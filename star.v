@@ -59,7 +59,7 @@ Variable MorR : morphism R.
 
 Lemma lem_star_refl : forall x, star R x x.
 Proof.
-  Reconstr.reasy (@star_n_refl) (@star).
+  Reconstr.reasy (@star_n_refl, lem_term_eq_refl) (@star).
 Qed.
 
 Lemma lem_star_step : forall x y z, R x y -> star R y z -> star R x z.
@@ -96,4 +96,3 @@ End Star.
 Ltac pose_star := pose proof @lem_star_refl; pose proof @lem_star_step;
                   pose proof @lem_star_trans; pose proof @lem_star_step1;
                   pose proof @lem_star_subset; pose proof lem_star_morphism; unfold morphism in *.
-

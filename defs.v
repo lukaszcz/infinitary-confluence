@@ -10,7 +10,8 @@ CoInductive term : Set :=
 
 CoInductive par_clos (R : relation term) : relation term :=
 | par_clos_base : forall x y, R x y -> par_clos R x y
-| par_clos_refl : forall x, par_clos R x x
+| par_clos_bot : par_clos R bot bot
+| par_clos_var : forall n, par_clos R (var n) (var n)
 | par_clos_app : forall x y x' y', par_clos R x x' -> par_clos R y y' -> par_clos R (app x y) (app x' y')
 | par_clos_abs : forall x y, par_clos R x y -> par_clos R (abs x) (abs y).
 

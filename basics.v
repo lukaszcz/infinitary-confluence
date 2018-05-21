@@ -44,7 +44,13 @@ Lemma lem_inf_morphism : morphism (inf_clos (star R)).
 Proof.
   assert (Hm: morphism (star R)) by eauto using lem_star_morphism.
   unfold morphism.
-  coinduction H.
+  coinduction H using auto.
+  - intros x1 y1 Heq1 Heq2.
+    inversion Heq2; subst; intuition; fold term_eq in *; econstructor; pose_term_eq; eauto.
+  - intros x1 y1 Heq1 Heq2.
+    inversion Heq2; subst; intuition; fold term_eq in *; econstructor; pose_term_eq; eauto.
+  - intros x1 y1 Heq1 Heq2.
+    inversion Heq2; subst; intuition; fold term_eq in *; econstructor; pose_term_eq; eauto.
   - intros x1 y1 Heq1 Heq2.
     inversion Heq2; subst; intuition; fold term_eq in *; econstructor; pose_term_eq; eauto.
 Qed.
@@ -75,7 +81,7 @@ Proof.
   unfold subst_closed.
   intros H x x'.
   enough (comp_clos R x x' -> forall n y, comp_clos R (x [n := y]) (x' [n := y])) by scrush.
-  intro H1; induction H1; intros; try rewrite H0; csolve.
+  intro H1; induction H1; intros; try rewrite H0; pose_term_eq; csolve.
 Qed.
 
 Lemma lem_comp_shift_closed : shift_closed R -> shift_closed (comp_clos R).
@@ -83,7 +89,7 @@ Proof.
   unfold shift_closed.
   intro H.
   enough (forall t t', comp_clos R t t' -> forall d c, comp_clos R (shift d c t) (shift d c t')) by scrush.
-  intros t t' H1; induction H1; intros; try rewrite H0; csolve.
+  intros t t' H1; induction H1; intros; try rewrite H0; pose_term_eq; csolve.
 Qed.
 
 Lemma lem_star_subst_closed : subst_closed R -> subst_closed (star R).

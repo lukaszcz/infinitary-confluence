@@ -67,9 +67,14 @@ Hint Rewrite lem_subst_simpl_bot lem_subst_simpl_var lem_subst_simpl_app lem_sub
 
 (************************************************************************************************)
 
-Lemma lem_par_clos_refl : forall R, reflexive term (par_clos R).
+Lemma lem_par_clos_refl : forall R x y, x == y -> par_clos R x y.
 Proof.
-  unfold reflexive; apply par_clos_refl.
+  coinduction.
+Qed.
+
+Lemma lem_par_clos_refl_0 : forall R, reflexive term (par_clos R).
+Proof.
+  coinduction on 1.
 Qed.
 
 Lemma lem_par_clos_sym : forall R, symmetric term R -> symmetric term (par_clos R).
@@ -79,7 +84,7 @@ Qed.
 
 Lemma lem_term_eq_refl : reflexive term term_eq.
 Proof.
-  sauto.
+  apply lem_par_clos_refl_0.
 Qed.
 
 Lemma lem_term_eq_sym : symmetric term term_eq.
@@ -151,7 +156,8 @@ Qed.
 
 Lemma lem_subst_mor : forall n t s t' s', t == t' -> s == s' -> t[n := s] == t'[n := s'].
 Proof.
-  pose lem_subst_mor_0; coinduction.
+  coinduction CH.
+  clear CH; intro; apply lem_subst_mor_0; auto.
 Qed.
 
 Add Parametric Morphism (n m : nat) : (shift n m) with

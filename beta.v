@@ -15,7 +15,7 @@ Proof.
     assert (n0 + m + n + k = n0 + n + k + m) by omega.
     scrush.
   - autorewrite with shints.
-    constructor 4; fold term_eq.
+    constructor 5; fold term_eq.
     assert (k + j + 1 = k + (j + 1)) by omega.
     yelles 1.
 Qed.
@@ -35,7 +35,7 @@ Proof.
     assert (n1 = n0 + (n + m)) by omega.
     scrush.
   - autorewrite with shints.
-    constructor 4; fold term_eq.
+    constructor 5; fold term_eq.
     assert (m + k + 1 = m + (k + 1)) by omega.
     yelles 1.
 Qed.
@@ -54,7 +54,7 @@ Proof.
     + autorewrite with shints; sauto; bomega.
     + autorewrite with shints; sauto; bomega.
   - autorewrite with shints.
-    constructor 4; fold term_eq.
+    constructor 5; fold term_eq.
     assert (HH: n + m + k + 1 = n + m + (k + 1)) by omega; rewrite HH; clear HH.
     assert (HH: n + k + 1 = n + (k + 1)) by omega; rewrite HH; clear HH.
     auto.
@@ -77,7 +77,7 @@ Proof.
     + rewrite lem_shift_plus_0; sauto.
     + rewrite lem_shift_subst_0; sauto.
   - autorewrite with shints; sauto.
-    constructor 4; fold term_eq.
+    constructor 5; fold term_eq.
     Reconstr.reasy (@Coq.Arith.PeanoNat.Nat.add_1_r, @Coq.Arith.Plus.plus_assoc_reverse) Reconstr.Empty.
 Qed.
 
@@ -89,7 +89,7 @@ Proof.
     + assert (n0 + n + d = n0 + d + n) by omega.
       scrush.
   - autorewrite with shints.
-    constructor 4; fold term_eq.
+    constructor 5; fold term_eq.
     assert (HH: forall m, m + k + 1 = m + (k + 1)) by (intros; omega).
     do 2 rewrite HH.
     auto.
@@ -105,7 +105,7 @@ Proof.
     + generalize (lem_shift_comp_2 d c n 0 t2); autorewrite with yhints; auto.
     + autorewrite with shints; sauto; bomega.
   - autorewrite with shints.
-    constructor 4; fold term_eq.
+    constructor 5; fold term_eq.
     assert (HH: c + k + 1 = c + (k + 1)) by omega.
     rewrite HH.
     auto.
@@ -118,8 +118,8 @@ Proof.
   unfold subst_closed.
   intros x x' n y H.
   inversion H; subst.
-  assert (x [n := y] == app (abs t1) t2 [n := y]) by ycrush.
-  assert (x' [n := y] == t1 [0 := t2] [n := y]) by ycrush.
+  assert (x [n := y] == app (abs t1) t2 [n := y]) by (pose_term_eq; ycrush).
+  assert (x' [n := y] == t1 [0 := t2] [n := y]) by (pose_term_eq; ycrush).
   autorewrite with shints in *.
   eapply beta_redex_c.
   - eauto.
@@ -504,7 +504,7 @@ Proof.
     assert (red_beta t' x) by (pose_red_beta; ycrush).
     fold inf_beta in *.
     assert (inf_beta t' x') by (pose_inf_beta; ycrush).
-    ycrush.
+    pose_term_eq; ycrush.
 Qed.
 
 Lemma lem_inf_beta_from_app :
