@@ -8,8 +8,6 @@ Require Export Setoid.
 Require Export Hammer.Hammer.
 Require Export Hammer.Reconstr.
 
-Hint Rewrite -> Arith.PeanoNat.Nat.add_assoc : yhints.
-
 Create HintDb shints discriminated.
 
 Hint Unfold reflexive : shints.

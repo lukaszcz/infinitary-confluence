@@ -1,5 +1,5 @@
 
-Require Import basics.
+Require Export basics.
 
 (************************************************************************************************)
 
@@ -189,7 +189,12 @@ Proof.
   constructor; econstructor; pose_term_eq; eauto.
 Qed.
 
-Lemma lem_red_beta_refl : reflexive term red_beta.
+Lemma lem_red_beta_refl : forall x y, x == y -> red_beta x y.
+Proof.
+  unfold red_beta; pose_star; ycrush.
+Qed.
+
+Lemma lem_red_beta_refl_0 : reflexive term red_beta.
 Proof.
   unfold red_beta; pose_star; scrush.
 Qed.
@@ -209,7 +214,7 @@ Proof.
   intros x x' H.
   destruct H as [ n H ].
   induction H; intro.
-  - rewrite H; apply lem_red_beta_refl.
+  - rewrite H; apply lem_red_beta_refl_0.
   - apply lem_red_beta_step with (y := app y y0).
     + constructor 2; fold step_beta; pose_term_eq; eauto.
     + auto.
@@ -220,7 +225,7 @@ Proof.
   intros y y' H.
   destruct H as [ n H ].
   induction H; intro.
-  - rewrite H; apply lem_red_beta_refl.
+  - rewrite H; apply lem_red_beta_refl_0.
   - apply lem_red_beta_step with (y := app x0 y).
     + constructor 3; fold step_beta; pose_term_eq; eauto.
     + auto.
@@ -236,7 +241,7 @@ Proof.
   intros x x' H.
   destruct H as [ n H ].
   induction H.
-  - rewrite H; apply lem_red_beta_refl.
+  - rewrite H; apply lem_red_beta_refl_0.
   - apply lem_red_beta_step with (y := abs y); csolve.
 Qed.
 
@@ -259,10 +264,10 @@ Qed.
 
 Lemma lem_step_beta_to_red_beta : forall x y, step_beta x y -> red_beta x y.
 Proof.
-  intros; eapply lem_red_beta_step; eauto using lem_red_beta_refl.
+  intros; eapply lem_red_beta_step; eauto using lem_red_beta_refl_0.
 Qed.
 
-Ltac pose_red_beta := pose proof lem_red_beta_refl; pose proof lem_red_beta_trans;
+Ltac pose_red_beta := pose proof lem_red_beta_refl_0; pose proof lem_red_beta_refl; pose proof lem_red_beta_trans;
                       pose proof lem_red_beta_step; pose proof lem_red_beta_step_rev;
                       pose proof lem_red_beta_redex; pose proof lem_step_beta_to_red_beta;
                       pose proof lem_red_beta_app; pose proof lem_red_beta_abs;
@@ -381,6 +386,181 @@ Proof.
 Qed.
 
 Ltac pose_inf_beta := pose proof lem_inf_beta_refl; pose proof lem_inf_beta_trans;
-                      pose proof lem_red_beta_to_inf_beta;
+                      pose proof lem_red_beta_to_inf_beta; pose proof lem_inf_beta_prepend;
+                      pose proof lem_inf_beta_append; pose proof lem_inf_beta_append_step;
                       pose proof lem_inf_beta_app; pose proof lem_inf_beta_abs;
                       autounfold with shints in *.
+
+(******************************************************************************)
+
+Lemma lem_step_beta_not_bot : forall t s, t == bot -> ~(step_beta t s).
+Proof.
+  unfold not; intros t s Ht H.
+  inversion H; sauto; pose_term_eq; yelles 2.
+Qed.
+
+Lemma lem_step_beta_not_var : forall t s n, t == (var n) -> ~(step_beta t s).
+Proof.
+  unfold not; intros t s n Ht H.
+  inversion H; sauto; pose_term_eq; yelles 2.
+Qed.
+
+Lemma lem_step_beta_preserves_abs : forall t s t', t == (abs t') -> step_beta t s ->
+                                                   exists s', s == abs s'/\ step_beta t' s'.
+Proof.
+  unfold not; intros t s t' Ht H.
+  inversion H; sauto.
+  - pose_term_eq; yelles 2.
+  - fold step_beta in *; exists y.
+    inversion Ht; subst; fold term_eq in *; try yelles 1.
+    rewrite <- H3; pose_term_eq; yelles 1.
+Qed.
+
+Lemma lem_red_beta_preserves_bot : forall t s, t == bot -> red_beta t s -> s == bot.
+Proof.
+  intros t s Ht H; destruct H as [n H].
+  induction H.
+  - pose_term_eq; eauto.
+  - pose lem_step_beta_not_bot; yelles 1.
+Qed.
+
+Lemma lem_red_beta_preserves_var : forall t s n, t == (var n) -> red_beta t s -> s == (var n).
+Proof.
+  intros t s n Ht H; destruct H as [m H].
+  induction H.
+  - pose_term_eq; eauto.
+  - pose lem_step_beta_not_var; yelles 1.
+Qed.
+
+Lemma lem_red_beta_preserves_abs : forall t s t', t == (abs t') -> red_beta t s ->
+                                                  exists s', s == (abs s') /\ red_beta t' s'.
+Proof.
+  intros t s t' Ht H; destruct H as [m H].
+  revert t' Ht.
+  induction H.
+  - pose_term_eq; pose_red_beta; eauto.
+  - intros t' Hx.
+    assert (exists y', y == abs y' /\ step_beta t' y') by
+        (pose lem_step_beta_preserves_abs; pose_term_eq; scrush).
+    pose_term_eq; pose_red_beta; ycrush.
+Qed.
+
+Lemma lem_red_beta_from_app :
+  forall x y, red_beta x y ->
+              forall t s, x == app t s ->
+                          (exists t' s', red_beta t t' /\ red_beta s s' /\ y == app t' s') \/
+                          exists z, red_beta t (abs z).
+Proof.
+  intros x y H; destruct H as [n H].
+  induction H; intros t s Hx.
+  - rewrite Hx in *; pose_term_eq; pose_red_beta; left; ycrush.
+  - inversion H; subst.
+    + inversion H1; subst.
+      right; exists t1; apply lem_red_beta_refl.
+      rewrite Hx in *.
+      pose_term_eq; ycrush.
+    + fold step_beta in *.
+      assert (HH: t == x0) by (pose_term_eq; ycrush).
+      rewrite <- HH in *; clear HH.
+      assert (HH: s == y0) by (pose_term_eq; ycrush).
+      rewrite <- HH in *; clear HH.
+      generalize (IHstar_n x' y' (lem_term_eq_refl (app x' y'))).
+      intro HH; destruct HH; simp_hyps.
+      * left; exists t'; exists s'; rewrite H2; pose_red_beta; ycrush.
+      * pose_red_beta; ycrush.
+    + fold step_beta in *.
+      assert (HH: t == x0) by (pose_term_eq; ycrush).
+      rewrite <- HH in *; clear HH.
+      assert (HH: s == y0) by (pose_term_eq; ycrush).
+      rewrite <- HH in *; clear HH.
+      generalize (IHstar_n x' y' (lem_term_eq_refl (app x' y'))).
+      intro HH; destruct HH; simp_hyps.
+      * left; exists t'; exists s'; rewrite H2; pose_red_beta; ycrush.
+      * pose_red_beta; ycrush.
+    + yelles 1.
+Qed.
+
+Lemma lem_inf_beta_preserves_bot : forall t s, t == bot -> inf_beta t s -> s == bot.
+Proof.
+  pose proof lem_red_beta_preserves_bot.
+  csolve on 3 using ycrush.
+Qed.
+
+Lemma lem_inf_beta_preserves_var : forall t s n, t == (var n) -> inf_beta t s -> s == (var n).
+Proof.
+  pose proof lem_red_beta_preserves_var.
+  csolve on 4 using ycrush.
+Qed.
+
+Lemma lem_inf_beta_preserves_abs : forall t s t', t == (abs t') -> inf_beta t s ->
+                                                  exists s', s == (abs s') /\ inf_beta t' s'.
+Proof.
+  csolve on 4 using auto.
+  - pose proof lem_red_beta_preserves_abs; ycrush.
+  - pose proof lem_red_beta_preserves_abs; ycrush.
+  - pose proof lem_red_beta_preserves_abs; ycrush.
+  - assert (exists y, x == y /\ red_beta t' y) by
+        (pose proof lem_red_beta_preserves_abs; ycrush).
+    assert (red_beta t' x) by (pose_red_beta; ycrush).
+    fold inf_beta in *.
+    assert (inf_beta t' x') by (pose_inf_beta; ycrush).
+    ycrush.
+Qed.
+
+Lemma lem_inf_beta_from_app :
+  forall x y, inf_beta x y ->
+              forall t s, x == app t s ->
+                          (exists t' s', inf_beta t t' /\ inf_beta s s' /\ y == app t' s') \/
+                          exists z, red_beta t (abs z).
+Proof.
+  csolve on 2 using auto.
+  - intros t s Hx.
+    generalize (lem_red_beta_from_app x bot H0 t s Hx).
+    pose_inf_beta; ycrush.
+  - intros t s Hx.
+    generalize (lem_red_beta_from_app x (var n) H0 t s Hx).
+    pose_inf_beta; ycrush.
+  - intros t s Hx.
+    fold inf_beta in *.
+    generalize (lem_red_beta_from_app x (app x0 y0) H0 t s Hx).
+    intro HH; destruct HH; simp_hyps.
+    + assert (HH: x0 == t') by ycrush.
+      rewrite HH in *; clear HH.
+      assert (HH: y0 == s') by ycrush.
+      rewrite HH in *; clear HH.
+      left; exists x'; exists y'.
+      pose_inf_beta; ycrush.
+    + pose_inf_beta; ycrush.
+  - intros t s Hx.
+    generalize (lem_red_beta_from_app x (abs x0) H0 t s Hx).
+    pose_inf_beta; ycrush.
+Qed.
+
+(******************************************************************************)
+
+Lemma lem_inf_beta_preserves_rnf : forall t s, is_rnf t -> inf_beta t s -> is_rnf s.
+Proof.
+  intros t s H; unfold is_rnf in H; repeat ysplit; yisolve; intros H1.
+  - unfold is_rnf; sauto.
+    + assert (red_beta (var n) bot) by ycrush.
+      assert (var n == bot) by (pose lem_red_beta_preserves_var; pose_term_eq; ycrush).
+      ycrush.
+    + assert (red_beta (var n) (app x y)) by ycrush.
+      assert (var n == app x y) by (pose lem_red_beta_preserves_var; pose_term_eq; ycrush).
+      ycrush.
+  - generalize (lem_inf_beta_from_app (app t1 t2) s H1 t1 t2 (lem_term_eq_refl (app t1 t2))).
+    unfold is_rnf; sauto.
+    + assert (HH: s1 == t') by ycrush.
+      rewrite HH in *; clear HH.
+      assert (HH: s2 == s') by ycrush.
+      rewrite HH in *; clear HH.
+      pose_inf_beta; ycrush.
+    + assert (inf_beta t1 (abs z)).
+      econstructor; [ econstructor; eauto | pose_inf_beta; ycrush ].
+      ycrush.
+    + assert (inf_beta t1 (abs z)).
+      econstructor; [ econstructor; eauto | pose_inf_beta; ycrush ].
+      ycrush.
+  - generalize (lem_inf_beta_preserves_abs (abs t) s t (lem_term_eq_refl (abs t)) H1).
+    unfold is_rnf; sauto.
+Qed.
