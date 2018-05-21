@@ -105,6 +105,7 @@ Definition meaningless (U : term -> Prop) :=
   U bot /\
   (forall x y, U x -> inf_beta x y -> U y) /\
   (forall x y n, U x -> U (x[n := y])) /\
+  (forall x d c, U x -> U (shift d c x)) /\
   (forall x y, U (abs x) -> U (app (abs x) y)) /\
   (forall x, root_active x -> U x) /\
   (forall x y, U x -> sim U x y -> U y).
