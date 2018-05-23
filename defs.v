@@ -1,6 +1,6 @@
 
-Require Import Arith.
-Require Import Relations.
+Require Export Arith.
+Require Export Relations.
 
 CoInductive term : Set :=
 | bot : term
@@ -85,6 +85,7 @@ Inductive step_wh : relation term :=
 | wh_step : forall x x' y y', step_wh x x' -> y == y' -> step_wh (app x y) (app x' y').
 
 Definition red_wh := star step_wh.
+Definition inf_wh := inf_clos red_wh.
 
 Definition is_abs t := match t with abs _ => True | _ => False end.
 

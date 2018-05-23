@@ -40,6 +40,91 @@ Proof.
   split; intro; eapply lem_star_morphism; pose_term_eq; eauto.
 Qed.
 
+(******************************************************************************)
+
+Definition red R := star (comp_clos R).
+Hint Unfold red.
+
+Add Parametric Morphism : (red R) with
+    signature term_eq ==> term_eq ==> iff as red_mor.
+Proof.
+  split; intro; eapply lem_star_morphism; pose lem_comp_morphism; pose_term_eq; eauto.
+Qed.
+
+Lemma lem_red_refl : forall x y, x == y -> red R x y.
+Proof.
+  yelles 2.
+Qed.
+
+Lemma lem_red_refl_0 : reflexive term (red R).
+Proof.
+  pose_term_eq; yelles 2.
+Qed.
+
+Lemma lem_red_trans : transitive term (red R).
+Proof.
+  generalize lem_comp_morphism; unfold transitive; pose_star; eauto.
+Qed.
+
+Lemma lem_red_step : forall x y z, comp_clos R x y -> red R y z -> red R x z.
+Proof.
+  generalize lem_comp_morphism; pose_star; eauto.
+Qed.
+
+Lemma lem_red_app_l : forall x x', red R x x' -> forall y, red R (app x y) (app x' y).
+Proof.
+  intros x x' H.
+  destruct H as [ n H ].
+  induction H; intro.
+  - rewrite H; apply lem_red_refl_0.
+  - apply lem_red_step with (y := app y y0).
+    + constructor 2; pose_term_eq; eauto.
+    + auto.
+Qed.
+
+Lemma lem_red_app_r : forall y y', red R y y' -> forall x, red R (app x y) (app x y').
+Proof.
+  intros y y' H.
+  destruct H as [ n H ].
+  induction H; intro.
+  - rewrite H; apply lem_red_refl_0.
+  - apply lem_red_step with (y := app x0 y).
+    + constructor 3; pose_term_eq; eauto.
+    + auto.
+Qed.
+
+Lemma lem_red_app : forall x x' y y', red R x x' -> red R y y' ->
+                                      red R (app x y) (app x' y').
+Proof.
+  eauto using lem_red_app_l, lem_red_app_r, lem_red_trans.
+Qed.
+
+Lemma lem_red_abs : forall x x', red R x x' -> red R (abs x) (abs x').
+Proof.
+  intros x x' H.
+  destruct H as [ n H ].
+  induction H.
+  - rewrite H; apply lem_red_refl_0.
+  - apply lem_red_step with (y := abs y); csolve.
+Qed.
+
+Lemma lem_red_step_rev : forall x y z, red R x y -> comp_clos R y z -> red R x z.
+Proof.
+  intros x y z H.
+  revert z.
+  destruct H as [ n H ].
+  induction H.
+  - intros; rewrite H; econstructor; econstructor 2; [ eauto | constructor; pose_term_eq; eauto ].
+  - eauto using lem_red_step.
+Qed.
+
+Lemma lem_step_to_red : forall x y, comp_clos R x y -> red R x y.
+Proof.
+  intros; eapply lem_red_step; eauto using lem_red_refl_0.
+Qed.
+
+(******************************************************************************)
+
 Lemma lem_inf_morphism : morphism (inf_clos (star R)).
 Proof.
   assert (Hm: morphism (star R)) by eauto using lem_star_morphism.
@@ -137,6 +222,8 @@ Qed.
 
 End Basic_clos_props.
 
+(******************************************************************************)
+
 Lemma lem_inf_subst (R : relation term):
   morphism R -> subst_closed R -> shift_closed R ->
   forall s s' t t', inf_clos (star R) s s' -> inf_clos (star R) t t' ->
@@ -147,7 +234,7 @@ Proof.
   clear H0; unfold subst_closed in Hs0.
   assert (Hs1: shift_closed (star R)) by auto using lem_star_shift_closed.
   clear H1; unfold shift_closed in Hs1.
-  coinduction H using auto.
+  coinduct H.
   - clear H; intros; autorewrite with shints.
     constructor.
     assert (HH: bot = bot [n := t]) by (autorewrite with shints; auto).
@@ -193,8 +280,48 @@ Proof.
     econstructor; eauto.
 Qed.
 
-Lemma lem_par_bot_to_sim (U : term -> Prop) :
+(******************************************************************************)
+
+Section Sim.
+
+Variable U : term -> Prop.
+
+Lemma lem_par_bot_to_sim :
   U bot -> forall x y, par_bot U x y -> sim U x y.
 Proof.
   intro; coinduction using ssolve.
 Qed.
+
+Lemma lem_sim_refl_0 : reflexive term (sim U).
+Proof.
+  coinduction on 0.
+Qed.
+
+Lemma lem_sim_refl :
+  (forall x y, U x -> x == y -> U y) -> forall x y, x == y -> sim U x y.
+Proof.
+  intro; coinduction.
+Qed.
+
+Lemma lem_sim_sym : symmetric term (sim U).
+Proof.
+  coinduction.
+Qed.
+
+Lemma lem_sim_trans : meaningless U -> transitive term (sim U).
+Proof.
+  unfold meaningless.
+  intro H; simp_hyps.
+  coinduction CH using auto.
+  - csolve CH.
+  - cintro; [ pose lem_sim_sym; clear CH; constructor; sintuition; eauto |
+              constructor 4; eapply CH; eauto ].
+  - cintro; [ pose lem_sim_sym; clear CH; constructor; sintuition; eauto |
+              constructor 5; eapply CH; eauto ].
+Qed.
+
+End Sim.
+
+Ltac pose_sim := pose proof lem_par_bot_to_sim; pose proof lem_sim_refl_0;
+                 pose proof lem_sim_refl; pose proof lem_sim_sym; pose proof lem_sim_trans;
+                 autounfold with shints in *.

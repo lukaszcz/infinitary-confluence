@@ -14,7 +14,7 @@ Hint Unfold reflexive : shints.
 Hint Unfold symmetric : shints.
 Hint Unfold transitive : shints.
 
-Ltac ssolve := auto; sauto; yelles 1.
+Ltac ssolve := eauto; sauto; yelles 1.
 
 Ltac notPropAtom t :=
   lazymatch type of t with
@@ -27,7 +27,12 @@ Ltac intros_until_prop_atom :=
          | [ |- forall x : ?A, _ ] => notPropAtom A; intro
          end.
 
-Ltac csolve0 H tac := intros; autorewrite with shints; solve [ econstructor; tac | try clear H; tac ].
+Ltac csolve0 H tac :=
+  intros; autorewrite with shints;
+  solve [ econstructor; solve [ eapply H; clear H; tac | try clear H; tac ] | try clear H; tac ].
+
+Tactic Notation "cosolve" hyp(H) := csolve0 H ltac:(eauto; yelles 1).
+Tactic Notation "cosolve" hyp(H) "using" tactic(tac) := csolve0 H tac.
 
 Ltac coind_solve C tac :=
   intros_until_prop_atom;
@@ -40,9 +45,9 @@ Ltac coind_solve C tac :=
     try solve [ csolve0 C tac ]
   end.
 
-Tactic Notation "csolve" hyp(H) := coind_solve H ltac:(yelles 1).
+Tactic Notation "csolve" hyp(H) := coind_solve H ltac:(eauto; yelles 1).
 Tactic Notation "csolve" hyp(H) "using" tactic(tac) := coind_solve H tac.
-Tactic Notation "csolve" := coind_solve 0 ltac:(yelles 1).
+Tactic Notation "csolve" := coind_solve 0 ltac:(eauto; yelles 1).
 Tactic Notation "csolve" "using" tactic(tac) := coind_solve 0 tac.
 
 Ltac coind_on_solve C n tac :=
@@ -62,9 +67,21 @@ Ltac coind_on_solve C n tac :=
     try solve [ csolve0 C tac ]
   end.
 
-Tactic Notation "csolve" hyp(H) "on" int_or_var(n) := coind_on_solve H n ltac:(yelles 1).
+Ltac cintro := 
+  match goal with
+  | [ |- forall _ : ?T, _ ] =>
+    isProp T;
+    let H := fresh "H" in
+    intro H; inversion H; try subst
+  | [ |- forall _ : ?T, _ ] =>
+    notProp T;
+    let x := fresh "x" in
+    intro x; destruct x; try subst
+  end.
+
+Tactic Notation "csolve" hyp(H) "on" int_or_var(n) := coind_on_solve H n ltac:(eauto; yelles 1).
 Tactic Notation "csolve" hyp(H) "on" int_or_var(n) "using" tactic(tac) := coind_on_solve H n tac.
-Tactic Notation "csolve" "on" int_or_var(n) := coind_on_solve 0 n ltac:(yelles 1).
+Tactic Notation "csolve" "on" int_or_var(n) := coind_on_solve 0 n ltac:(eauto; yelles 1).
 Tactic Notation "csolve" "on" int_or_var(n) "using" tactic(tac) := coind_on_solve 0 n tac.
 
 Tactic Notation "coinduction" ident(H) := autounfold with shints; cofix H; csolve H.
@@ -77,6 +94,11 @@ Tactic Notation "coinduction" ident(H) "on" int_or_var(n) "using" tactic(tac) :=
 Tactic Notation "coinduction" "on" int_or_var(n) := let H := fresh "H" in coinduction H on n.
 Tactic Notation "coinduction" "on" int_or_var(n) "using" tactic(tac) :=
   let H := fresh "H" in coinduction H on n using tac.
+
+Tactic Notation "coinduct" ident(H) :=
+  autounfold with shints; cofix H; intros_until_prop_atom; try cintro.
+Tactic Notation "coinduct" ident(H) "on" int_or_var(n) :=
+  autounfold with shints; cofix H; do n intro; try cintro.
 
 Ltac bnat_reflect :=
   repeat match goal with

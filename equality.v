@@ -17,7 +17,27 @@ Proof.
   unfold peek; sauto.
 Qed.
 
+Lemma lem_peek_eq_match :
+  forall t, match t with
+            | bot => bot
+            | var n => var n
+            | app x y => app x y
+            | abs x => abs x
+            end = t.
+Proof.
+  sauto.
+Qed.  
+
+Ltac peek_on t :=
+  replace t with (peek t); [ unfold peek; simpl; rewrite lem_peek_eq_match |
+                             rewrite <- lem_peek_eq; reflexivity ].
+Ltac peek_at n :=
+  rewrite lem_peek_eq at n; unfold peek; simpl; rewrite lem_peek_eq_match.
+
 Ltac peek_tac := intros; rewrite lem_peek_eq at 1; unfold peek; sauto.
+
+Tactic Notation "peek" constr(t) := peek_on t.
+Tactic Notation "peek" "at" integer(n) := peek_at n.
 
 Lemma lem_shift_simpl_bot : forall d c, shift d c bot = bot.
 Proof.

@@ -191,68 +191,37 @@ Qed.
 
 Lemma lem_red_beta_refl : forall x y, x == y -> red_beta x y.
 Proof.
-  unfold red_beta; pose_star; ycrush.
+  apply lem_red_refl; apply lem_beta_redex_morphism.
 Qed.
 
 Lemma lem_red_beta_refl_0 : reflexive term red_beta.
 Proof.
-  unfold red_beta; pose_star; scrush.
+  apply lem_red_refl_0; apply lem_beta_redex_morphism.
 Qed.
 
 Lemma lem_red_beta_trans : transitive term red_beta.
 Proof.
-  generalize lem_step_beta_morphism; unfold red_beta; unfold transitive; pose_star; eauto.
+  apply lem_red_trans; apply lem_beta_redex_morphism.
 Qed.
 
 Lemma lem_red_beta_step : forall x y z, step_beta x y -> red_beta y z -> red_beta x z.
 Proof.
-  generalize lem_step_beta_morphism; unfold red_beta; pose_star; eauto.
-Qed.
-
-Lemma lem_red_beta_app_l : forall x x', red_beta x x' -> forall y, red_beta (app x y) (app x' y).
-Proof.
-  intros x x' H.
-  destruct H as [ n H ].
-  induction H; intro.
-  - rewrite H; apply lem_red_beta_refl_0.
-  - apply lem_red_beta_step with (y := app y y0).
-    + constructor 2; fold step_beta; pose_term_eq; eauto.
-    + auto.
-Qed.
-
-Lemma lem_red_beta_app_r : forall y y', red_beta y y' -> forall x, red_beta (app x y) (app x y').
-Proof.
-  intros y y' H.
-  destruct H as [ n H ].
-  induction H; intro.
-  - rewrite H; apply lem_red_beta_refl_0.
-  - apply lem_red_beta_step with (y := app x0 y).
-    + constructor 3; fold step_beta; pose_term_eq; eauto.
-    + auto.
+  apply lem_red_step; apply lem_beta_redex_morphism.
 Qed.
 
 Lemma lem_red_beta_app : forall x x' y y', red_beta x x' -> red_beta y y' -> red_beta (app x y) (app x' y').
 Proof.
-  eauto using lem_red_beta_app_l, lem_red_beta_app_r, lem_red_beta_trans.
+  apply lem_red_app; apply lem_beta_redex_morphism.
 Qed.
 
 Lemma lem_red_beta_abs : forall x x', red_beta x x' -> red_beta (abs x) (abs x').
 Proof.
-  intros x x' H.
-  destruct H as [ n H ].
-  induction H.
-  - rewrite H; apply lem_red_beta_refl_0.
-  - apply lem_red_beta_step with (y := abs y); csolve.
+  apply lem_red_abs; apply lem_beta_redex_morphism.
 Qed.
 
 Lemma lem_red_beta_step_rev : forall x y z, red_beta x y -> step_beta y z -> red_beta x z.
 Proof.
-  intros x y z H.
-  revert z.
-  destruct H as [ n H ].
-  induction H.
-  - intros; rewrite H; econstructor; econstructor 2; [ eauto | constructor; pose_term_eq; eauto ].
-  - eauto using lem_red_beta_step.
+  apply lem_red_step_rev; apply lem_beta_redex_morphism.
 Qed.
 
 Lemma lem_red_beta_redex : forall x y, red_beta (app (abs x) y) (x [0 := y]).
@@ -264,7 +233,7 @@ Qed.
 
 Lemma lem_step_beta_to_red_beta : forall x y, step_beta x y -> red_beta x y.
 Proof.
-  intros; eapply lem_red_beta_step; eauto using lem_red_beta_refl_0.
+  apply lem_step_to_red; apply lem_beta_redex_morphism.
 Qed.
 
 Ltac pose_red_beta := pose proof lem_red_beta_refl_0; pose proof lem_red_beta_refl; pose proof lem_red_beta_trans;
@@ -272,6 +241,8 @@ Ltac pose_red_beta := pose proof lem_red_beta_refl_0; pose proof lem_red_beta_re
                       pose proof lem_red_beta_redex; pose proof lem_step_beta_to_red_beta;
                       pose proof lem_red_beta_app; pose proof lem_red_beta_abs;
                       autounfold with shints in *.
+
+(******************************************************************************)
 
 Lemma lem_step_beta_shift_closed : shift_closed step_beta.
 Proof.
