@@ -177,15 +177,15 @@ Proof.
   apply lem_step_wh_morphism.
 Qed.
 
-Lemma lem_inf_wh_refl : reflexive term inf_wh.
+Lemma lem_inf_wh_refl_0 : reflexive term inf_wh.
 Proof.
-  unfold inf_wh, red_wh; pose lem_inf_refl; scrush.
+  unfold inf_wh, red_wh; pose lem_inf_refl_0; scrush.
 Qed.
 
 Lemma lem_inf_wh_subst_closed : subst_closed inf_wh.
 Proof.
   unfold subst_closed.
-  pose lem_inf_wh_subst; pose lem_inf_wh_refl; scrush.
+  pose lem_inf_wh_subst; pose lem_inf_wh_refl_0; scrush.
 Qed.
 
 Lemma lem_inf_wh_prepend : forall x y z, red_wh x y -> inf_wh y z -> inf_wh x z.
@@ -253,15 +253,15 @@ Qed.
 
 Lemma lem_inf_wh_app : forall x x' y y', inf_wh x x' -> inf_wh y y' -> inf_wh (app x y) (app x' y').
 Proof.
-  pose_red_wh; pose lem_inf_wh_refl; coinduction.
+  pose_red_wh; pose lem_inf_wh_refl_0; coinduction.
 Qed.
 
 Lemma lem_inf_wh_abs : forall x x', inf_wh x x' -> inf_wh (abs x) (abs x').
 Proof.
-  pose_red_wh; pose lem_inf_wh_refl; coinduction.
+  pose_red_wh; pose lem_inf_wh_refl_0; coinduction.
 Qed.
 
-Ltac pose_inf_wh := pose proof lem_inf_wh_refl; pose proof lem_inf_wh_trans;
+Ltac pose_inf_wh := pose proof lem_inf_wh_refl_0; pose proof lem_inf_wh_trans;
                     pose proof lem_red_wh_to_inf_wh; pose proof lem_inf_wh_prepend;
                     pose proof lem_inf_wh_append_red_wh; pose proof lem_inf_wh_append_step_wh;
                     pose proof lem_inf_wh_append_red_beta; pose proof lem_inf_wh_append_step_beta;

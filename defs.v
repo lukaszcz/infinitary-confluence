@@ -76,6 +76,8 @@ CoInductive inf_clos (R : relation term) : relation term :=
                                      inf_clos R s (app x' y')
 | inf_clos_abs : forall s x x', R s (abs x) -> inf_clos R x x' -> inf_clos R s (abs x').
 
+Definition aux_clos (R : relation term) := inf_clos (inf_clos (star R)).
+
 (* infinitary beta reduction *)
 Definition inf_beta := inf_clos red_beta.
 

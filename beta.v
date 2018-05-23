@@ -284,7 +284,7 @@ Qed.
 
 Lemma lem_inf_beta_refl : reflexive term inf_beta.
 Proof.
-  unfold inf_beta; unfold red_beta; pose lem_inf_refl; scrush.
+  unfold inf_beta; unfold red_beta; pose lem_inf_refl_0; scrush.
 Qed.
 
 Lemma lem_inf_beta_subst_closed : subst_closed inf_beta.

@@ -140,9 +140,14 @@ Proof.
     inversion Heq2; subst; intuition; fold term_eq in *; econstructor; pose_term_eq; eauto.
 Qed.
 
-Lemma lem_inf_refl : reflexive term (inf_clos (star R)).
+Lemma lem_inf_refl_0 : reflexive term (inf_clos (star R)).
 Proof.
   pose_star; coinduction on 0.
+Qed.
+
+Lemma lem_inf_refl : forall x y, x == y -> inf_clos (star R) x y.
+Proof.
+  pose_star; pose_term_eq; coinduction on 0.
 Qed.
 
 Lemma lem_inf_prepend : forall x y z, star R x y -> inf_clos (star R) y z -> inf_clos (star R) x z.
@@ -152,7 +157,7 @@ Qed.
 
 Lemma lem_star_to_inf : forall x y, star R x y -> inf_clos (star R) x y.
 Proof.
-  Reconstr.reasy (lem_inf_refl, lem_inf_prepend) (reflexive).
+  Reconstr.reasy (lem_inf_refl_0, lem_inf_prepend) (reflexive).
 Qed.
 
 Lemma lem_inf_subset (S : relation term) : (forall x y, R x y -> S x y) ->
@@ -278,6 +283,46 @@ Proof.
   - assert (HH: inf_clos R x (abs x0)) by eauto.
     inversion HH; subst.
     econstructor; eauto.
+Qed.
+
+Lemma lem_inf_reflexive (R : relation term) : reflexive term R -> reflexive term (inf_clos R).
+Proof.
+  intro; coinduction on 0.
+Qed.
+
+Lemma lem_R_to_inf (R : relation term) : morphism R -> reflexive term R ->
+  forall x y, R x y -> inf_clos R x y.
+Proof.
+  intros Hm Hr.
+  pose lem_inf_reflexive; coinduction CH on 1.
+Qed.
+
+Lemma lem_inf_to_aux (R : relation term) : morphism R ->
+  forall x y, inf_clos (star R) x y -> aux_clos R x y.
+Proof.
+  unfold aux_clos.
+  pose lem_inf_morphism; pose lem_R_to_inf; pose lem_inf_refl_0; ycrush.
+Qed.
+
+Lemma lem_inf_prepend_step (R : relation term) :
+  transitive term R -> forall x y z, R x y -> inf_clos R y z -> inf_clos R x z.
+Proof.
+  csolve on 5.
+Qed.
+
+Lemma lem_aux_to_inf (R : relation term) :
+  appendable (star R) -> forall x y, aux_clos R x y -> inf_clos (star R) x y.
+Proof.
+  intros Ha.
+  unfold aux_clos.
+  coinduction CH using eauto.
+  - inversion H0; subst.
+    assert (inf_clos (inf_clos (star R)) x1 x') by (pose lem_inf_prepend_step; pose lem_inf_trans; ycrush).
+    assert (inf_clos (inf_clos (star R)) y y') by (pose lem_inf_prepend_step; pose lem_inf_trans; ycrush).
+    cosolve CH.
+  - inversion H0; subst.
+    assert (inf_clos (inf_clos (star R)) x1 x') by (pose lem_inf_prepend_step; pose lem_inf_trans; ycrush).
+    cosolve CH.
 Qed.
 
 (******************************************************************************)

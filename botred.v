@@ -351,7 +351,7 @@ Qed.
 
 Lemma lem_inf_beta_bot_refl : reflexive term (inf_beta_bot U).
 Proof.
-  unfold inf_beta_bot, red_beta_bot; pose lem_inf_refl; scrush.
+  unfold inf_beta_bot, red_beta_bot; pose lem_inf_refl_0; scrush.
 Qed.
 
 Lemma lem_inf_beta_bot_prepend : forall x y z, red_beta_bot U x y -> inf_beta_bot U y z -> inf_beta_bot U x z.

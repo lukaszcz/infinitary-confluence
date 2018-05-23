@@ -1,4 +1,4 @@
-all : tactics.vo star.vo defs.vo equality.vo basics.vo beta.vo botred.vo cases.vo
+all : tactics.vo star.vo defs.vo equality.vo basics.vo beta.vo botred.vo cases.vo weak.vo
 
 tactics.vo : tactics.v
 	coqc tactics.v
@@ -23,6 +23,9 @@ beta.vo : beta.v basics.vo
 
 botred.vo : botred.v beta.vo cases.vo
 	coqc botred.v
+
+weak.vo : weak.v beta.vo
+	coqc weak.v
 
 clean:
 	rm -f .*.aux *.vo *.glob
