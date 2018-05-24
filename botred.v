@@ -1,4 +1,3 @@
-
 Require Import beta.
 Require Import cases.
 
@@ -151,12 +150,11 @@ Proof.
   - clear CH; intros.
     generalize (lem_bot_redex_subst t t' s s' H0 n).
     sintuition.
-    + yelles 1.
-    + assert (HH: t' == bot) by ycrush.
-      rewrite HH.
-      rewrite H4.
-      autorewrite with shints; repeat ysplit; try bomega.
-      ycrush.
+    assert (HH: t' == bot) by ycrush.
+    rewrite HH.
+    rewrite H4.
+    autorewrite with shints; repeat ysplit; try bomega.
+    ycrush.
   - clear CH; intros; autorewrite with shints; repeat ysplit; try bomega.
     + eauto using lem_par_bot_refl_0.
     + eauto using lem_par_bot_shift_closed.
@@ -442,11 +440,7 @@ Qed.
 
 Lemma lem_step_beta_bot_disj : forall t s, step_beta_bot U t s -> step_beta t s \/ step_bot U t s.
 Proof.
-  induction 1.
-  - unfold beta_bot_redex in *; ycrush.
-  - sintuition; [ left | right ]; csolve.
-  - sintuition; [ left | right ]; csolve.
-  - sintuition; [ left | right ]; csolve.
+  induction 1; sintuition; unfold beta_bot_redex in *; ycrush.
 Qed.
 
 Lemma lem_red_beta_bot_decompose : forall t s, red_beta_bot U t s -> exists r, red_beta t r /\ par_bot U r s.

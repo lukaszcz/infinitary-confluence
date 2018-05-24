@@ -124,3 +124,9 @@ Definition red_beta_bot U := star (step_beta_bot U).
 Definition inf_beta_bot U := inf_clos (red_beta_bot U).
 Definition par_beta_bot U := par_clos (beta_bot_redex U).
 Definition par_bot U := par_clos (bot_redex U).
+
+(************************************************************************)
+(* Assumed axioms: constructive indefinite description (see cases.v)
+   and some specializations of excluded middle. *)
+
+Axiom is_rnf_dec : forall t, is_rnf t \/ ~(is_rnf t).

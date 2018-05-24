@@ -1,4 +1,3 @@
-
 Require Export basics.
 
 (************************************************************************************************)
@@ -273,7 +272,7 @@ Proof.
   pose lem_step_beta_morphism; pose lem_star_subst_closed; pose lem_step_beta_subst_closed; scrush.
 Qed.
 
-Lemma lem_inf_beta_subst : 
+Lemma lem_inf_beta_subst :
   forall s s' t t', inf_beta s s' -> inf_beta t t' ->
                     forall n, inf_beta (subst n t s) (subst n t' s').
 Proof.
