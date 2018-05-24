@@ -72,7 +72,7 @@ Lemma lem_wh_commute : forall t t1 t2, inf_wh t t1 -> red_wh t t2 ->
 Proof.
   intros t t1 t2 H1 H.
   revert t1 H1.
-  destruct H as [n H]; induction H.
+  induction H.
   - intros; rewrite H in *; pose_red_wh; ycrush.
   - intros t1 H1.
     generalize (lem_wh_step_commute x t1 y H1 H); sintuition.
@@ -119,16 +119,15 @@ Proof.
   destruct H as [t' [H1 H2]].
   generalize (lem_rnf_red_wh t t' H2 H1); intro HH; destruct HH as [s [HH1 [HH2 HH3]]].
   clear H2; revert HH1.
-  destruct HH2 as [n H].
+  rename HH2 into H.
   induction H; intros.
   - exists x; unfold is_crnf; split; intros; rewrite H in *; pose_red_wh; pose lem_inf_beta_to_inf_wh; ycrush.
   - generalize (is_rnf_dec x); intro Hd; destruct Hd as [ Hd | Hd ].
     + exists x; unfold is_crnf; pose_red_wh; pose lem_inf_beta_to_inf_wh; ycrush.
     + unfold is_crnf in *.
-      generalize (IHstar_n HH3 HH1); intro HH; destruct HH as [r [Hr1 Hr2]].
+      generalize (IHstar HH3 HH1); intro HH; destruct HH as [r [Hr1 Hr2]].
       exists r; split; eauto; intros.
       generalize (lem_rnf_red_wh x s H2 H3); intro HH; destruct HH as [s' [H4 [H5 H6]]].
-      destruct H5 as [m H5].
       inversion_clear H5; subst.
       * exfalso; rewrite H7 in *; ycrush.
       * assert (Hy0: y0 == y) by reasy (@weak.lem_step_wh_unique) Reconstr.Empty.

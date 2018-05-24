@@ -60,11 +60,9 @@ Inductive comp_clos (R : relation term) : relation term :=
 (* beta reduction step *)
 Definition step_beta := comp_clos beta_redex.
 
-Inductive star_n (R : relation term) : nat -> relation term :=
-| star_n_refl : forall x y, x == y -> star_n R 0 x y
-| star_n_step : forall n x y z, R x y -> star_n R n y z -> star_n R (S n) x z.
-
-Definition star (R : relation term) (x y : term) := exists n, star_n R n x y.
+Inductive star (R : relation term) : relation term :=
+| star_refl : forall x y, x == y -> star R x y
+| star_step : forall x y z, R x y -> star R y z -> star R x z.
 
 (* finitary beta reduction *)
 Definition red_beta := star step_beta.

@@ -74,7 +74,6 @@ Qed.
 Lemma lem_red_app_l : forall x x', red R x x' -> forall y, red R (app x y) (app x' y).
 Proof.
   intros x x' H.
-  destruct H as [ n H ].
   induction H; intro.
   - rewrite H; apply lem_red_refl_0.
   - apply lem_red_step with (y := app y y0).
@@ -85,7 +84,6 @@ Qed.
 Lemma lem_red_app_r : forall y y', red R y y' -> forall x, red R (app x y) (app x y').
 Proof.
   intros y y' H.
-  destruct H as [ n H ].
   induction H; intro.
   - rewrite H; apply lem_red_refl_0.
   - apply lem_red_step with (y := app x0 y).
@@ -102,7 +100,6 @@ Qed.
 Lemma lem_red_abs : forall x x', red R x x' -> red R (abs x) (abs x').
 Proof.
   intros x x' H.
-  destruct H as [ n H ].
   induction H.
   - rewrite H; apply lem_red_refl_0.
   - apply lem_red_step with (y := abs y); csolve.
@@ -112,9 +109,8 @@ Lemma lem_red_step_rev : forall x y z, red R x y -> comp_clos R y z -> red R x z
 Proof.
   intros x y z H.
   revert z.
-  destruct H as [ n H ].
   induction H.
-  - intros; rewrite H; econstructor; econstructor 2; [ eauto | constructor; pose_term_eq; eauto ].
+  - intros; rewrite H; econstructor 2; [ eauto | constructor; pose_term_eq; eauto ].
   - eauto using lem_red_step.
 Qed.
 
@@ -186,14 +182,14 @@ Lemma lem_star_subst_closed : subst_closed R -> subst_closed (star R).
 Proof.
   unfold subst_closed.
   intro H; sauto.
-  induction H1; try rewrite H0; pose_star; eauto.
+  induction H0; try rewrite H0; pose_star; eauto.
 Qed.
 
 Lemma lem_star_shift_closed : shift_closed R -> shift_closed (star R).
 Proof.
   unfold shift_closed.
   intro H; sauto.
-  induction H1; try rewrite H0; pose_star; eauto.
+  induction H0; try rewrite H0; pose_star; eauto.
 Qed.
 
 Lemma lem_inf_shift_closed : shift_closed R -> shift_closed (inf_clos R).

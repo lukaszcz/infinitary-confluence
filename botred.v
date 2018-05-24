@@ -263,7 +263,7 @@ Qed.
 
 Lemma lem_red_beta_bot_redex_beta : forall x y, red_beta_bot U (app (abs x) y) (x [0 := y]).
 Proof.
-  intros; econstructor; econstructor 2.
+  intros; econstructor 2.
   - eauto using lem_step_beta_bot_redex_beta.
   - constructor; pose_term_eq; eauto.
 Qed.
@@ -271,7 +271,7 @@ Qed.
 Lemma lem_red_beta_bot_redex_bot : forall x y, bot_redex U x y -> red_beta_bot U x y.
 Proof.
   unfold bot_redex.
-  intros; simp_hyps; econstructor; econstructor 2.
+  intros; simp_hyps; econstructor 2.
   - eauto using lem_step_beta_bot_redex_bot.
   - constructor; pose_term_eq; eauto.
 Qed.
@@ -306,7 +306,6 @@ Qed.
 Lemma lem_red_beta_to_red_beta_bot : forall x y, red_beta x y -> red_beta_bot U x y.
 Proof.
   intros x y H.
-  destruct H as [n H].
   induction H.
   - ycrush.
   - pose lem_step_beta_to_red_beta_bot; pose lem_red_beta_bot_trans; ycrush.
@@ -434,7 +433,6 @@ Lemma lem_par_bot_over_red_beta :
 Proof.
   intros t1 t2 t3 H1 H.
   revert t1 H1.
-  destruct H as [n H].
   induction H; pose lem_par_bot_trans; pose lem_par_bot_over_step_beta; pose_red_beta; ycrush.
 Qed.
 
@@ -446,7 +444,6 @@ Qed.
 Lemma lem_red_beta_bot_decompose : forall t s, red_beta_bot U t s -> exists r, red_beta t r /\ par_bot U r s.
 Proof.
   intros t s H.
-  destruct H as [n H].
   induction H.
   - pose lem_par_bot_refl; pose_red_beta; ycrush.
   - assert (HH: step_beta x y \/ step_bot U x y) by eauto using lem_step_beta_bot_disj.

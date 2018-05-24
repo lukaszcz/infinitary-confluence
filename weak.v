@@ -24,13 +24,6 @@ Proof.
     ycrush.
 Qed.
 
-Lemma lem_star_n_step_wh_morphism : forall n, morphism (star_n step_wh n).
-Proof.
-  unfold red_wh.
-  apply lem_star_n_morphism.
-  apply lem_step_wh_morphism.
-Qed.
-
 Lemma lem_red_wh_morphism : morphism red_wh.
 Proof.
   unfold red_wh.
@@ -49,12 +42,6 @@ Add Parametric Morphism : step_wh with
     signature term_eq ==> term_eq ==> iff as step_wh_mor.
 Proof.
   split; intro; eapply lem_step_wh_morphism; pose_term_eq; eauto.
-Qed.
-
-Add Parametric Morphism (n : nat) : (star_n step_wh n) with
-    signature term_eq ==> term_eq ==> iff as star_n_step_wh_mor.
-Proof.
-  split; intro; eapply lem_star_n_step_wh_morphism; pose_term_eq; eauto.
 Qed.
 
 Add Parametric Morphism : red_wh with
@@ -83,7 +70,6 @@ Lemma lem_red_wh_step_rev : forall x y z, red_wh x y -> step_wh y z -> red_wh x 
 Proof.
   unfold red_wh.
   intros x y z H.
-  destruct H as [n H].
   revert z.
   induction H; pose_star; ycrush.
 Qed.
@@ -95,21 +81,20 @@ Qed.
 
 Lemma lem_red_wh_redex : forall x y, red_wh (app (abs x) y) (x [0 := y]).
 Proof.
-  intros; econstructor; econstructor 2.
+  intros; econstructor 2.
   - eauto using lem_step_wh_redex.
   - constructor; pose_term_eq; eauto.
 Qed.
 
 Lemma lem_step_wh_to_red_wh : forall x y, step_wh x y -> red_wh x y.
 Proof.
-  intros; econstructor; econstructor 2; eauto.
+  intros; econstructor 2; eauto.
   econstructor; pose_term_eq; ycrush.
 Qed.
 
 Lemma lem_red_wh_app : forall x x' y, red_wh x x' -> red_wh (app x y) (app x' y).
 Proof.
   intros x x' y H.
-  destruct H as [n H].
   revert y.
   induction H; intro y0.
   - apply lem_red_wh_refl; pose_term_eq; ycrush.
@@ -125,7 +110,6 @@ Qed.
 Lemma lem_red_wh_to_red_beta : forall x y, red_wh x y -> red_beta x y.
 Proof.
   intros x y H.
-  destruct H as [n H].
   induction H.
   - ycrush.
   - pose lem_step_wh_to_step_beta; pose_star; pose lem_beta_redex_morphism;
@@ -231,8 +215,7 @@ Lemma lem_inf_wh_append_red_beta : forall t1 t2 t3, inf_wh t1 t2 -> red_beta t2 
 Proof.
   intros t1 t2 t3 H1 H2.
   revert t1 H1.
-  destruct H2 as [n H].
-  induction H; intros.
+  induction H2; intros.
   - rewrite <- H; assumption.
   - pose lem_inf_wh_append_step_beta; eauto.
 Qed.
@@ -307,7 +290,7 @@ Qed.
 
 Lemma lem_red_beta_to_inf_wh : forall x y, red_beta x y -> inf_wh x y.
 Proof.
-  intros x y H; destruct H as [n H]; induction H;
+  intros x y H; induction H;
     pose lem_step_beta_to_inf_wh; pose_red_wh; pose_inf_wh; ycrush.
 Qed.
 
@@ -339,7 +322,7 @@ Qed.
 Lemma lem_red_wh_from_abs : forall x y, red_wh (abs x) y -> y == abs x.
 Proof.
   enough (forall x y u, u = abs x -> red_wh u y -> y == abs x) by ycrush.
-  intros x y u H1 H; destruct H as [n H]; induction H; pose lem_step_wh_not_abs; ycrush.
+  intros x y u H1 H; induction H; pose lem_step_wh_not_abs; ycrush.
 Qed.
 
 Lemma lem_inf_wh_from_abs : forall x y, inf_wh (abs x) y -> exists z, y == abs z /\ inf_wh x z.
@@ -370,21 +353,11 @@ Proof.
     + pose_term_eq; ycrush.
 Qed.
 
-Lemma lem_star_n_step_wh_unique : forall n x y z, star_n step_wh n x y -> star_n step_wh n x z -> y == z.
-Proof.
-  induction n.
-  - pose lem_step_wh_unique; scrush.
-  - sauto.
-    assert (HH: y0 == y1) by (pose lem_step_wh_unique; scrush).
-    rewrite HH in *; clear HH.
-    eauto.
-Qed.
-
 Definition step_wh_eq x y := step_wh x y \/ x == y.
 Hint Unfold step_wh_eq.
 
 Lemma lem_red_wh_rev : forall t s, red_wh t s -> (exists u, step_wh t u /\ red_wh u s) \/ t == s.
 Proof.
   intros t s H.
-  destruct H as [n H]; inversion H; subst; [ right; pose_term_eq; ycrush | left; ycrush ].
+  inversion H; subst; [ right; pose_term_eq; ycrush | left; ycrush ].
 Qed.
