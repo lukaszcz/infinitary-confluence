@@ -98,7 +98,7 @@ Definition is_rnf (t : term) :=
   end.
 
 Definition has_rnf t := exists t', is_rnf t' /\ inf_beta t t'.
-Definition root_active t := forall t', inf_beta t t' -> ~(is_rnf t').
+Definition root_active t := ~(has_rnf t).
 
 Definition sim (U : term -> Prop) := par_clos (fun x y => U x /\ U y).
 

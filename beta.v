@@ -344,6 +344,11 @@ Proof.
   eauto using lem_star_to_inf, lem_step_beta_morphism.
 Qed.
 
+Lemma lem_step_beta_to_inf_beta : forall x y, step_beta x y -> inf_beta x y.
+Proof.
+  Reconstr.reasy (@lem_step_beta_to_red_beta, @lem_red_beta_to_inf_beta) Reconstr.Empty.
+Qed.
+
 Lemma lem_inf_beta_app : forall x x' y y', inf_beta x x' -> inf_beta y y' -> inf_beta (app x y) (app x' y').
 Proof.
   pose_red_beta; pose lem_inf_beta_refl; coinduction.
@@ -532,4 +537,72 @@ Proof.
       ycrush.
   - generalize (lem_inf_beta_preserves_abs (abs t) s t (lem_term_eq_refl (abs t)) H1).
     unfold is_rnf; sauto.
+Qed.
+
+(******************************************************************************)
+
+Lemma lem_step_beta_shift :
+  forall t s, step_beta t s -> forall d c t0, t == shift d c t0 ->
+                                              exists s0, s == shift d c s0 /\ step_beta t0 s0.
+Proof.
+  induction 1.
+  - inversion_clear H; intros.
+    rewrite H0 in *; clear H0.
+    destruct t0; autorewrite with shints in *; sauto.
+    inversion H; subst; yisolve; fold term_eq in *.
+    destruct t0_1; autorewrite with shints in *; sauto.
+    inversion H4; subst; yisolve; fold term_eq in *.
+    exists (t0_1 [0 := t0_2]).
+    rewrite H1.
+    rewrite H3.
+    rewrite H6.
+    split.
+    + generalize (lem_shift_subst_2 d c 0 t0_1 t0_2); sauto.
+    + Reconstr.reasy (@lem_step_beta_redex) Reconstr.Empty.
+  - intros.
+    rewrite H0 in *; clear H0.
+    destruct t0; autorewrite with shints in *; sauto.
+    inversion H1; subst; yisolve; fold term_eq in *.
+    generalize (IHcomp_clos d c t0_1 H4); intro HH; destruct HH as [x0 [HH1 HH2]].
+    exists (app x0 t0_2).
+    rewrite H6.
+    rewrite HH1.
+    autorewrite with shints.
+    pose_term_eq; ycrush.
+  - intros.
+    rewrite H0 in *; clear H0.
+    destruct t0; autorewrite with shints in *; sauto.
+    inversion H1; subst; yisolve; fold term_eq in *.
+    generalize (IHcomp_clos d c t0_2 H6); intro HH; destruct HH as [y0 [HH1 HH2]].
+    exists (app t0_1 y0).
+    rewrite H4.
+    rewrite HH1.
+    autorewrite with shints.
+    pose_term_eq; ycrush.
+  - intros.
+    destruct t0; autorewrite with shints in *; sauto.
+    inversion H0; subst; yisolve; fold term_eq in *.
+    generalize (IHcomp_clos d (c + 1) t0 H3); intro HH; destruct HH as [x0 [HH1 HH2]].
+    exists (abs x0).
+    rewrite HH1.
+    autorewrite with shints.
+    pose_term_eq; ycrush.
+Qed.
+
+Lemma lem_red_beta_shift :
+  forall t s, red_beta t s -> forall d c t0, t == shift d c t0 ->
+                                             exists s0, s == shift d c s0 /\ red_beta t0 s0.
+Proof.
+  induction 1.
+  - pose_red_beta; pose_term_eq; pose lem_step_beta_shift; ycrush.
+  - destruct t0; autorewrite with shints in *; sauto.
+    + Reconstr.reasy (@lem_step_beta_not_bot) Reconstr.Empty.
+    + Reconstr.reasy (@lem_step_beta_not_var) Reconstr.Empty.
+    + Reconstr.reasy (@lem_step_beta_not_var) Reconstr.Empty.
+    + generalize (lem_step_beta_shift x y H d c (app t0_1 t0_2)); intro HH; destruct HH as [x0 [HH1 HH2]];
+        autorewrite with shints; eauto.
+      pose_red_beta; pose_term_eq; ycrush.
+    + generalize (lem_step_beta_shift x y H d c (abs t0)); intro HH; destruct HH as [x0 [HH1 HH2]];
+        autorewrite with shints; eauto.
+      pose_red_beta; pose_term_eq; ycrush.
 Qed.
