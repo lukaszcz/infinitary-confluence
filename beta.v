@@ -181,6 +181,12 @@ Proof.
   split; intro; eapply lem_inf_beta_morphism; pose_term_eq; eauto.
 Qed.
 
+Add Parametric Morphism : is_rnf with
+    signature term_eq ==> iff as is_rnf_mor.
+Proof.
+  split; unfold is_rnf; sauto; inversion H; ycrush.
+Qed.
+
 (************************************************************************************************)
 
 Lemma lem_step_beta_redex : forall x y, step_beta (app (abs x) y) (x [0 := y]).

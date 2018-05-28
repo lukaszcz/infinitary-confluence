@@ -4,12 +4,6 @@ Require Import cases.
 Definition is_crnf t r := is_rnf r /\ forall s, inf_beta t s -> is_rnf s -> red_wh t r /\ inf_wh r s.
 Hint Unfold is_crnf.
 
-Add Parametric Morphism : is_rnf with
-    signature term_eq ==> iff as step_wh_mor.
-Proof.
-  split; unfold is_rnf; sauto; inversion H; ycrush.
-Qed.
-
 Lemma lem_crnf_exists : forall t, has_rnf t -> exists r, is_crnf t r.
 Proof.
   intros t H.

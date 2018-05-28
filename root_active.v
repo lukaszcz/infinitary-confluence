@@ -349,19 +349,6 @@ Proof.
   generalize lem_inf_beta_shift_closed; unfold shift_closed; ycrush.
 Qed.
 
-Lemma lem_is_rnf_morphism : forall x y, x == y -> is_rnf x -> is_rnf y.
-Proof.
-  intros x y H1 H2; destruct x, y; sauto.
-  inversion_clear H1; yisolve; fold term_eq in *.
-  rewrite <- H3 in H; ycrush.
-Qed.
-
-Add Parametric Morphism : is_rnf  with
-    signature term_eq ==> iff as is_rnf_mor.
-Proof.
-  pose lem_is_rnf_morphism; pose_term_eq; ycrush.
-Qed.
-
 Lemma lem_has_rnf_shift : forall d c t, has_rnf (shift d c t) -> has_rnf t.
 Proof.
   unfold has_rnf.
