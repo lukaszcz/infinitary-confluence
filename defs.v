@@ -128,3 +128,4 @@ Definition par_bot U := par_clos (bot_redex U).
    and some specializations of excluded middle. *)
 
 Axiom is_rnf_dec : forall t, is_rnf t \/ ~(is_rnf t).
+Axiom has_rnf_dec : forall t, has_rnf t \/ ~(has_rnf t).
