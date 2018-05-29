@@ -173,3 +173,22 @@ Proof.
   destruct H.
   destruct (crnf t p); sauto.
 Qed.
+
+Lemma lem_is_crnf_morphism : forall t t' r, t == t' -> is_crnf t r -> is_crnf t' r.
+Proof.
+  unfold is_crnf.
+  sauto.
+  exists n.
+  sauto.
+  - rewrite <- H; auto.
+  - rewrite <- H in *; eauto.
+Qed.
+
+Lemma lem_crnf_morphism : forall t t' p p', t == t' -> crnf t p == crnf t' p'.
+Proof.
+  intros.
+  assert (is_crnf t (crnf t p)) by (pose lem_crnf_is_crnf; ycrush).
+  assert (is_crnf t' (crnf t' p')) by (pose lem_crnf_is_crnf; ycrush).
+  assert (is_crnf t' (crnf t p)) by (pose lem_is_crnf_morphism; ycrush).
+  pose lem_is_crnf_unique; ycrush.
+Qed.
