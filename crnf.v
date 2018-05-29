@@ -164,3 +164,12 @@ Lemma lem_red_beta_to_crnf : forall t (p : has_rnf t), red_beta t (crnf t p).
 Proof.
   Reconstr.reasy (lem_red_wh_to_crnf, lem_red_wh_to_red_beta) Reconstr.Empty.
 Qed.
+
+Lemma lem_crnf_not_bot : forall t p, crnf t p <> bot.
+Proof.
+  intros.
+  generalize (lem_crnf_is_crnf t p).
+  intro H.
+  destruct H.
+  destruct (crnf t p); sauto.
+Qed.
