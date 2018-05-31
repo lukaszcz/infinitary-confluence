@@ -592,6 +592,11 @@ Proof.
       eapply CH.
 Qed.
 
+Lemma lem_inf_beta_bot_preserves_U : forall x y, inf_beta_bot U x y -> U x -> U y.
+Proof.
+  pose thm_inf_beta_bot_decompose; pose lem_par_bot_preserves_U; ycrush.
+Qed.
+
 (************************************************************************************************)
 
 Lemma lem_inf_beta_bot_rnf_to_var : forall t n, is_rnf t -> inf_beta_bot U t (var n) -> t == var n.
