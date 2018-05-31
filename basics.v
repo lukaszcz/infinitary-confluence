@@ -1,4 +1,3 @@
-
 Require Export defs.
 Require Export tactics.
 Require Export star.
@@ -320,49 +319,3 @@ Proof.
     assert (inf_clos (inf_clos (star R)) x1 x') by (pose lem_inf_prepend_step; pose lem_inf_trans; ycrush).
     cosolve CH.
 Qed.
-
-(******************************************************************************)
-
-Section Sim.
-
-Variable U : term -> Prop.
-
-Lemma lem_par_bot_to_sim :
-  U bot -> forall x y, par_bot U x y -> sim U x y.
-Proof.
-  intro; coinduction using ssolve.
-Qed.
-
-Lemma lem_sim_refl_0 : reflexive term (sim U).
-Proof.
-  coinduction on 0.
-Qed.
-
-Lemma lem_sim_refl :
-  (forall x y, U x -> x == y -> U y) -> forall x y, x == y -> sim U x y.
-Proof.
-  intro; coinduction.
-Qed.
-
-Lemma lem_sim_sym : symmetric term (sim U).
-Proof.
-  coinduction.
-Qed.
-
-Lemma lem_sim_trans : meaningless U -> transitive term (sim U).
-Proof.
-  unfold meaningless.
-  intro H; simp_hyps.
-  coinduction CH using auto.
-  - csolve CH.
-  - cintro; [ pose lem_sim_sym; clear CH; constructor; sintuition; eauto |
-              constructor 4; eapply CH; eauto ].
-  - cintro; [ pose lem_sim_sym; clear CH; constructor; sintuition; eauto |
-              constructor 5; eapply CH; eauto ].
-Qed.
-
-End Sim.
-
-Ltac pose_sim := pose proof lem_par_bot_to_sim; pose proof lem_sim_refl_0;
-                 pose proof lem_sim_refl; pose proof lem_sim_sym; pose proof lem_sim_trans;
-                 autounfold with shints in *.

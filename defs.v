@@ -123,6 +123,12 @@ Definition inf_beta_bot U := inf_clos (red_beta_bot U).
 Definition par_beta_bot U := par_clos (beta_bot_redex U).
 Definition par_bot U := par_clos (bot_redex U).
 
+Definition nf (R : relation term) (t : term) := forall s, ~(R t s).
+Hint Unfold nf.
+
+Definition nf_beta := nf step_beta.
+Definition nf_beta_bot U := nf (step_beta_bot U).
+
 (************************************************************************)
 (* Assumed axioms: constructive indefinite description (see cases.v)
    and some specializations of excluded middle. *)

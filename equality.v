@@ -1,4 +1,3 @@
-
 Require Import defs.
 Require Import tactics.
 
@@ -26,7 +25,7 @@ Lemma lem_peek_eq_match :
             end = t.
 Proof.
   sauto.
-Qed.  
+Qed.
 
 Ltac peek_on t :=
   replace t with (peek t); [ unfold peek; simpl; rewrite lem_peek_eq_match |

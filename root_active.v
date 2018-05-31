@@ -1,5 +1,6 @@
 
 Require Import weak.
+Require Import sim.
 
 Inductive is_var_app (n : nat) : term -> Prop :=
 | is_var_app_var : forall t, t == var n -> is_var_app n t
@@ -97,9 +98,6 @@ Proof.
     + assert (n + 1 - (m + 1) = n - m) by omega.
       ycrush.
 Qed.
-
-Definition step_beta_eq t s := step_beta t s \/ t == s.
-Hint Unfold step_beta_eq.
 
 Lemma lem_step_beta_preserves_succ :
   forall t t', step_beta t t' -> forall n s, succ n t s ->

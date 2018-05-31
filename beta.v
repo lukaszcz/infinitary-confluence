@@ -1,5 +1,8 @@
 Require Export basics.
 
+Definition step_beta_eq t s := step_beta t s \/ t == s.
+Hint Unfold step_beta_eq.
+
 (************************************************************************************************)
 
 Lemma lem_shift_0 : forall c t, shift 0 c t == t.

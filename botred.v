@@ -1,4 +1,5 @@
 Require Import beta.
+Require Import sim.
 Require Import cases.
 
 Section Botred.
@@ -64,13 +65,6 @@ Proof.
 Qed.
 
 (************************************************************************************************)
-
-Lemma lem_U_morphism : forall x y, U x -> x == y -> U y.
-Proof.
-  intros.
-  assert (inf_beta x y) by (pose_inf_beta; ycrush).
-  sauto.
-Qed.
 
 Lemma lem_bot_redex_morphism : morphism (bot_redex U).
 Proof.
@@ -656,6 +650,25 @@ Proof.
   destruct HH as [ s' [ H5 H6 ]].
   assert (inf_beta_bot U t s') by (apply lem_inf_beta_to_inf_beta_bot; pose_inf_beta; ycrush).
   eapply lem_inf_beta_bot_append_par_bot; eauto.
+Qed.
+
+Lemma lem_par_bot_preserves_rnf_rev :
+  (forall t, U t \/ ~ U t) -> forall t s, par_bot U t s -> is_rnf s -> is_rnf t \/ U t.
+Proof.
+  destruct Hs as [Hm Hexp].
+  intro H; unfold is_rnf; intros; repeat ysplit; try solve [ sauto ].
+  destruct (H (app t1 t2)); yisolve.
+  inversion_clear H0.
+  - ycrush.
+  - left; intros.
+    assert (Hsim: sim U t1 s1) by (pose lem_par_bot_to_sim; ycrush).
+    generalize (lem_inf_beta_preserves_sim U Hm t1 s1 z H0 Hsim); intro HH; destruct HH as [s [HH1 HH2]].
+    inversion HH2; subst; try yelles 1.
+    unfold not; intro; destruct z; try yelles 1.
+    assert (U (app (abs z) t2)) by ycrush.
+    assert (inf_beta (app t1 t2) (app (abs z) t2)) by
+	Reconstr.reasy (@beta.lem_inf_beta_refl, @beta.lem_inf_beta_app) (@Coq.Relations.Relation_Definitions.reflexive, @Coq.Relations.Relation_Definitions.symmetric).
+    ycrush.
 Qed.
 
 End Botred_strong.
