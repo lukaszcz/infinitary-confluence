@@ -592,6 +592,32 @@ Proof.
       eapply CH.
 Qed.
 
+(************************************************************************************************)
+
+Lemma lem_inf_beta_bot_rnf_to_var : forall t n, is_rnf t -> inf_beta_bot U t (var n) -> t == var n.
+Proof.
+  intros.
+  assert (Hr: exists r, inf_beta t r /\ par_bot U r (var n)) by
+      Reconstr.reasy (@Botred.thm_inf_beta_bot_decompose) Reconstr.Empty.
+  destruct Hr as [r [Hr1 Hr2]].
+  assert (r = var n) by (inversion_clear Hr2; ycrush).
+  subst.
+  inversion_clear Hr1.
+  destruct t; yisolve.
+  - pose lem_red_beta_preserves_var; pose_term_eq; ycrush.
+  - assert ((exists t' s' : term, red_beta t1 t' /\ red_beta t2 s' /\ var n == app t' s') \/
+            (exists z : term, red_beta t1 (abs z))) by
+        (pose lem_red_beta_from_app; pose_term_eq; ycrush).
+    isplit; simp_hyps.
+    + ycrush.
+    + assert (is_abs (abs z)) by ycrush.
+      assert (inf_beta t1 (abs z)) by (pose_inf_beta; ycrush).
+      unfold is_rnf in *; exfalso; eapply H; eauto.
+  - assert (exists s, var n == abs s /\ red_beta t s) by
+        (pose lem_red_beta_preserves_abs; pose_term_eq; ycrush).
+    sauto.
+Qed.
+  
 End Botred.
 
 (************************************************************************************************)
@@ -667,7 +693,87 @@ Proof.
     unfold not; intro; destruct z; try yelles 1.
     assert (U (app (abs z) t2)) by ycrush.
     assert (inf_beta (app t1 t2) (app (abs z) t2)) by
-	Reconstr.reasy (@beta.lem_inf_beta_refl, @beta.lem_inf_beta_app) (@Coq.Relations.Relation_Definitions.reflexive, @Coq.Relations.Relation_Definitions.symmetric).
+        Reconstr.reasy (@beta.lem_inf_beta_refl, @beta.lem_inf_beta_app) (@Coq.Relations.Relation_Definitions.reflexive, @Coq.Relations.Relation_Definitions.symmetric).
+    ycrush.
+Qed.
+
+Lemma lem_inf_beta_bot_rnf_to_abs : forall t s, is_rnf t -> inf_beta_bot U t (abs s) ->
+                                                exists t0, t = abs t0 /\ inf_beta_bot U t0 s.
+Proof.
+  intros.
+  assert (Hr: exists r, inf_beta t r /\ par_bot U r (abs s)) by
+      Reconstr.reasy (thm_inf_beta_bot_decompose) Reconstr.Empty.
+  destruct Hr as [r [Hr1 Hr2]].
+  assert (exists r0, r = abs r0) by (inversion_clear Hr2; ycrush).
+  simp_hyps.
+  subst.
+  inversion_clear Hr1.
+  destruct t; yisolve.
+  - assert (var n == abs x) by
+        (pose lem_red_beta_preserves_var; pose_term_eq; ycrush).
+    ycrush.
+  - assert ((exists t' s' : term, red_beta t1 t' /\ red_beta t2 s' /\ abs x == app t' s') \/
+            (exists z : term, red_beta t1 (abs z))) by
+        (pose lem_red_beta_from_app; pose_term_eq; ycrush).
+    isplit; simp_hyps.
+    + ycrush.
+    + assert (is_abs (abs z)) by ycrush.
+      assert (inf_beta t1 (abs z)) by (pose_inf_beta; ycrush).
+      unfold is_rnf in *; exfalso; eapply H; eauto.
+  - assert (exists s, abs x == abs s /\ red_beta t s) by
+        (pose lem_red_beta_preserves_abs; pose_term_eq; ycrush).
+    simp_hyps.
+    assert (HH: s0 == x) by (pose_term_eq; ycrush).
+    rewrite HH in *; clear HH.
+    assert (inf_beta t r0) by
+	Reconstr.reasy (@beta.lem_inf_beta_prepend) (@defs.inf_beta, @defs.red_beta).
+    inversion_clear Hr2.
+    + exfalso; ycrush.
+    + exists t; split; yisolve.
+      pose lem_inf_beta_bot_append_par_bot; pose lem_inf_beta_to_inf_beta_bot; ycrush.
+Qed.
+
+Lemma lem_inf_beta_bot_rnf_to_app : forall t s1 s2, is_rnf t -> inf_beta_bot U t (app s1 s2) ->
+                                                    exists t1 t2, t = app t1 t2 /\
+                                                                  inf_beta_bot U t1 s1 /\
+                                                                  inf_beta_bot U t2 s2.
+Proof.
+  intros.
+  assert (Hr: exists r, inf_beta t r /\ par_bot U r (app s1 s2)) by
+      Reconstr.reasy (thm_inf_beta_bot_decompose) Reconstr.Empty.
+  destruct Hr as [r [Hr1 Hr2]].
+  assert (exists r1 r2, r = app r1 r2) by (inversion_clear Hr2; ycrush).
+  simp_hyps.
+  subst.
+  inversion_clear Hr1.
+  destruct t; yisolve.
+  - assert (var n == app x y) by
+        (pose lem_red_beta_preserves_var; pose_term_eq; ycrush).
+    ycrush.
+  - assert ((exists t' s' : term, red_beta t1 t' /\ red_beta t2 s' /\ app x y == app t' s') \/
+            (exists z : term, red_beta t1 (abs z))) by
+        (pose lem_red_beta_from_app; pose_term_eq; ycrush).
+    isplit; simp_hyps.
+    + inversion H6; subst; fold term_eq in *; yisolve.
+      exists t1, t2.
+      rewrite <- H10 in *.
+      rewrite <- H12 in *.
+      assert (inf_beta t1 r1) by
+	  Reconstr.reasy (@beta.lem_inf_beta_prepend) (@defs.inf_beta, @defs.red_beta).
+      assert (inf_beta t2 r2) by
+	  Reconstr.reasy (@beta.lem_inf_beta_prepend) (@defs.inf_beta, @defs.red_beta).
+      inversion_clear Hr2.
+      * exfalso; ycrush.
+      * assert (inf_beta_bot U t1 s1) by
+            (pose lem_inf_beta_bot_append_par_bot; pose lem_inf_beta_to_inf_beta_bot; ycrush).
+        assert (inf_beta_bot U t2 s2) by
+            (pose lem_inf_beta_bot_append_par_bot; pose lem_inf_beta_to_inf_beta_bot; ycrush).
+        ycrush.
+    + assert (is_abs (abs z)) by ycrush.
+      assert (inf_beta t1 (abs z)) by (pose_inf_beta; ycrush).
+      unfold is_rnf in *; exfalso; eapply H; eauto.
+  - assert (exists s, app x y == abs s /\ red_beta t s) by
+        (pose lem_red_beta_preserves_abs; pose_term_eq; ycrush).
     ycrush.
 Qed.
 
