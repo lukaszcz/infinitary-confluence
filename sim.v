@@ -59,6 +59,11 @@ Proof.
               constructor 5; eapply CH; eauto ].
 Qed.
 
+Lemma lem_sim_subset (R : term -> Prop) : (forall x, U x -> R x) -> forall x y, sim U x y -> sim R x y.
+Proof.
+  intro H; coinduction.
+Qed.
+
 Lemma lem_sim_shift_closed : meaningless U -> shift_closed (sim U).
 Proof.
   unfold shift_closed.

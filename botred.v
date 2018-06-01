@@ -1,5 +1,5 @@
-Require Import beta.
-Require Import sim.
+Require Export beta.
+Require Export sim.
 Require Import cases.
 
 Section Botred.
@@ -599,11 +599,47 @@ Qed.
 
 (************************************************************************************************)
 
+Lemma lem_red_beta_bot_nf : forall t s, nf_beta_bot U t -> red_beta_bot U t s -> t == s.
+Proof.
+  intros t s H0 H.
+  induction H.
+  - auto.
+  - exfalso; ycrush.
+Qed.
+
+Lemma lem_nf_beta_bot_app : forall t1 t2, nf_beta_bot U (app t1 t2) -> nf_beta_bot U t1 /\ nf_beta_bot U t2.
+Proof.
+  unfold nf_beta_bot, nf, not.
+  intros; split; intros; eapply H; solve [ econstructor; ycrush ].
+Qed.
+
+Lemma lem_nf_beta_bot_abs : forall t, nf_beta_bot U (abs t) -> nf_beta_bot U t.
+Proof.
+  unfold nf_beta_bot, nf, not.
+  intros; eapply H; solve [ econstructor; ycrush ].
+  Unshelve.
+  auto.
+Qed.
+
+Lemma lem_inf_beta_bot_nf : forall t s, nf_beta_bot U t -> inf_beta_bot U t s -> t == s.
+Proof.
+  pose proof lem_red_beta_bot_nf.
+  coinduction CH on 3.
+  - assert (t == app x y) by (clear CH; ycrush).
+    destruct t; try solve [ clear CH; yelles 1 ].
+    inversion H5; subst; fold term_eq in *; try solve [ clear CH; yisolve ].
+    apply par_clos_app; apply CH; clear CH; pose lem_nf_beta_bot_app; pose_term_eq; ycrush.
+  - assert (t == abs x) by (clear CH; ycrush).
+    destruct t; try solve [ clear CH; yelles 1 ].
+    inversion H4; subst; fold term_eq in *; try solve [ clear CH; yisolve ].
+    apply par_clos_abs; apply CH; clear CH; pose lem_nf_beta_bot_abs; pose_term_eq; ycrush.
+Qed.
+
 Lemma lem_inf_beta_bot_rnf_to_var : forall t n, is_rnf t -> inf_beta_bot U t (var n) -> t == var n.
 Proof.
   intros.
   assert (Hr: exists r, inf_beta t r /\ par_bot U r (var n)) by
-      Reconstr.reasy (@Botred.thm_inf_beta_bot_decompose) Reconstr.Empty.
+      Reconstr.reasy (thm_inf_beta_bot_decompose) Reconstr.Empty.
   destruct Hr as [r [Hr1 Hr2]].
   assert (r = var n) by (inversion_clear Hr2; ycrush).
   subst.
@@ -622,7 +658,7 @@ Proof.
         (pose lem_red_beta_preserves_abs; pose_term_eq; ycrush).
     sauto.
 Qed.
-  
+
 End Botred.
 
 (************************************************************************************************)
