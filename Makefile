@@ -1,6 +1,9 @@
-all : tactics.vo star.vo defs.vo equality.vo basics.vo beta.vo sim.vo botred.vo cases.vo weak.vo crnf.vo root_active.vo nred.vo main.vo
+all : Reconstr.vo tactics.vo star.vo defs.vo equality.vo basics.vo beta.vo sim.vo botred.vo cases.vo weak.vo crnf.vo root_active.vo nred.vo main.vo
 
-tactics.vo : tactics.v
+Reconstr.vo : Reconstr.v
+	coqc Reconstr.v
+
+tactics.vo : tactics.v Reconstr.vo
 	coqc tactics.v
 
 defs.vo : defs.v

@@ -5,8 +5,7 @@ Require Export Relations.
 Require Export Morphisms.
 Require Export Setoid.
 
-Require Export Hammer.Hammer.
-Require Export Hammer.Reconstr.
+Require Export Reconstr.
 
 Create HintDb shints discriminated.
 
