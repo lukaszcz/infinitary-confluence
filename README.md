@@ -2,13 +2,14 @@
 This is a formalisation of coinductive confluence and normalisation
 proofs for the infinitary lambda-calculus. The following theorems are
 formalised.
-1. Confluence of infinitary beta-bot reduction for any set of strongly
-   meaningless terms.
-2. Normalisation of infinitary beta-bot reduction for any set of
-   strongly meaningless terms.
-3. Confluence of infinitary beta-bot reduction for root-active terms.
-4. Normalisation of infinitary beta-bot reduction for root-active
-   terms.
+1. Confluence of infinitary beta-bot reduction with any set of
+   strongly meaningless terms as meaningless.
+2. Normalisation of infinitary beta-bot reduction with any set of
+   strongly meaningless terms as meaningless.
+3. Confluence of infinitary beta-bot reduction with root-active terms
+   as meaningless.
+4. Normalisation of infinitary beta-bot reduction with root-active
+   terms as meaningless.
 5. Confluence of infinitary beta-reduction modulo any set of
    meaningless terms.
 
