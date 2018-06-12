@@ -564,12 +564,3 @@ Proof.
   - Reconstr.reasy (@lem_sim_ra_preserves_ra) (@sim_ra, @defs.has_rnf, @defs.is_rnf, @defs.root_active).
   - Reconstr.reasy (@lem_ra_expansion) Reconstr.Empty.
 Qed.
-
-Lemma lem_ra_dec : forall t, {root_active t}+{~(root_active t)}.
-Proof.
-  intro t.
-  enough ({ u : {root_active t}+{~(root_active t)} | True}) by ycrush.
-  apply constructive_indefinite_description.
-  unfold root_active.
-  destruct (has_rnf_dec t); ycrush.
-Qed.

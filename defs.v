@@ -131,7 +131,7 @@ Definition nf_beta_bot U := nf (step_beta_bot U).
 
 (************************************************************************)
 (* Assumed axioms: constructive indefinite description (see cases.v)
-   and some specializations of excluded middle. *)
+   and some specializations of the excluded middle. *)
 
-Axiom is_rnf_dec : forall t, is_rnf t \/ ~(is_rnf t).
-Axiom has_rnf_dec : forall t, has_rnf t \/ ~(has_rnf t).
+Axiom is_rnf_xm : forall t, is_rnf t \/ ~(is_rnf t).
+Axiom has_rnf_xm : forall t, has_rnf t \/ ~(has_rnf t).

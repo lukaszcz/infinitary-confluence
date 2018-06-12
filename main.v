@@ -3,20 +3,20 @@ Require Import root_active.
 Require Import botred.
 
 Theorem thm_inf_beta_bot_confluent
-        (U : term -> Prop) (Hms : strongly_meaningless U) (Hdec : forall t, {U t}+{~U t})
+        (U : term -> Prop) (Hms : strongly_meaningless U) (Hxm : forall t, U t \/ ~U t)
   : forall t t1 t2, inf_beta_bot U t t1 -> inf_beta_bot U t t2 ->
                     exists t3, inf_beta_bot U t1 t3 /\ inf_beta_bot U t2 t3.
 Proof.
   destruct Hms as [Hm Hexp].
   intros.
-  assert (exists t1', red_nu U Hm t1 t1') by
+  assert (exists t1', red_nu U Hm Hxm t1 t1') by
       (pose lem_red_nu_reduct; ycrush).
-  assert (exists t2', red_nu U Hm t2 t2') by
+  assert (exists t2', red_nu U Hm Hxm t2 t2') by
       (pose lem_red_nu_reduct; ycrush).
   sauto.
-  assert (red_nu U Hm t t1') by
+  assert (red_nu U Hm Hxm t t1') by
       (pose lem_red_nu_inf_beta_bot_prepend; ycrush).
-  assert (red_nu U Hm t t2') by
+  assert (red_nu U Hm Hxm t t2') by
       (pose lem_red_nu_inf_beta_bot_prepend; ycrush).
   assert (t1' == t2') by
       (pose lem_red_nu_unique; ycrush).
@@ -32,13 +32,13 @@ Check thm_inf_beta_bot_confluent.
 Print Assumptions thm_inf_beta_bot_confluent.
 
 Theorem thm_inf_beta_bot_normalisation
-        (U : term -> Prop) (Hms : strongly_meaningless U) (Hdec : forall t, {U t}+{~U t})
+        (U : term -> Prop) (Hms : strongly_meaningless U) (Hxm : forall t, U t \/ ~U t)
   : forall t, exists s, inf_beta_bot U t s /\ nf_beta_bot U s /\
                         forall s', inf_beta_bot U t s' -> nf_beta_bot U s' -> s' == s.
 Proof.
   destruct Hms as [Hm Hexp].
   intro t.
-  assert (exists s, red_nu U Hm t s) by
+  assert (exists s, red_nu U Hm Hxm t s) by
       (pose lem_red_nu_reduct; ycrush).
   sauto.
   assert (nf_beta_bot U s) by
@@ -61,7 +61,7 @@ Theorem thm_inf_beta_bot_ra_confluent
   : forall t t1 t2, inf_beta_bot root_active t t1 -> inf_beta_bot root_active t t2 ->
                     exists t3, inf_beta_bot root_active t1 t3 /\ inf_beta_bot root_active t2 t3.
 Proof.
-  pose thm_ra_strongly_meaningless; pose lem_ra_dec; pose thm_inf_beta_bot_confluent; ycrush.
+  pose thm_ra_strongly_meaningless; pose has_rnf_xm; pose thm_inf_beta_bot_confluent; ycrush.
 Qed.
 
 Check thm_inf_beta_bot_ra_confluent.
@@ -71,7 +71,7 @@ Theorem thm_inf_beta_bot_ra_normalisation
   : forall t, exists s, inf_beta_bot root_active t s /\ nf_beta_bot root_active s /\
                         forall s', inf_beta_bot root_active t s' -> nf_beta_bot root_active s' -> s' == s.
 Proof.
-  pose thm_ra_strongly_meaningless; pose lem_ra_dec; pose thm_inf_beta_bot_normalisation; ycrush.
+  pose thm_ra_strongly_meaningless; pose has_rnf_xm; pose thm_inf_beta_bot_normalisation; ycrush.
 Qed.
 
 Check thm_inf_beta_bot_ra_normalisation.

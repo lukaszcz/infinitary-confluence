@@ -74,7 +74,8 @@ Proof.
 Qed.
 
 Definition is_crnf t r := is_rnf r /\
-                          exists n, step_wh_n n t r /\ forall s m, step_wh_n m t s -> is_rnf s -> m >= n.
+                          exists n, step_wh_n n t r /\
+                                    forall s m, step_wh_n m t s -> is_rnf s -> m >= n.
 Hint Unfold is_crnf.
 
 Lemma lem_crnf_exists : forall t, has_rnf t -> exists r, is_crnf t r.
@@ -91,7 +92,7 @@ Proof.
     + exists 0; split.
       * pose_term_eq; ycrush.
       * intros; omega.
-  - generalize (is_rnf_dec x); intro Hd; destruct Hd as [ Hd | Hd ].
+  - generalize (is_rnf_xm x); intro Hd; destruct Hd as [ Hd | Hd ].
     + exists x; unfold is_crnf; split; [ auto | exists 0 ].
       split; [ pose_term_eq; ycrush | intros; omega ].
     + unfold is_crnf in *.

@@ -124,15 +124,11 @@ Lemma lem_inf_morphism : morphism (inf_clos (star R)).
 Proof.
   assert (Hm: morphism (star R)) by eauto using lem_star_morphism.
   unfold morphism.
-  coinduction H using auto.
-  - intros x1 y1 Heq1 Heq2.
-    inversion Heq2; subst; intuition; fold term_eq in *; econstructor; pose_term_eq; eauto.
-  - intros x1 y1 Heq1 Heq2.
-    inversion Heq2; subst; intuition; fold term_eq in *; econstructor; pose_term_eq; eauto.
-  - intros x1 y1 Heq1 Heq2.
-    inversion Heq2; subst; intuition; fold term_eq in *; econstructor; pose_term_eq; eauto.
-  - intros x1 y1 Heq1 Heq2.
-    inversion Heq2; subst; intuition; fold term_eq in *; econstructor; pose_term_eq; eauto.
+  enough (forall x y, inf_clos (star R) x y ->
+                      forall x' y', y == y' -> x == x' ->
+                                    inf_clos (star R) x' y') by ycrush.
+  coinduct CH; intros x1 y1 Heq1 Heq2;
+    inversion Heq1; subst; intuition; fold term_eq in *; econstructor; pose_term_eq; eauto.
 Qed.
 
 Lemma lem_inf_refl_0 : reflexive term (inf_clos (star R)).

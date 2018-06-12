@@ -39,7 +39,7 @@ crnf.vo : crnf.v weak.vo cases.vo
 root_active.vo : root_active.v weak.vo sim.vo cases.vo
 	coqc root_active.v
 
-nred.vo : nred.v crnf.vo botred.vo sim.vo
+nred.vo : nred.v crnf.vo botred.vo sim.vo cases.vo
 	coqc nred.v
 
 main.vo : main.v nred.vo root_active.vo botred.vo

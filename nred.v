@@ -2,18 +2,19 @@
 Require Import crnf.
 Require Import botred.
 Require Import sim.
+Require Import cases.
 
 Section RedNu.
 
 Variable U : term -> Prop.
 Variable Hm : meaningless U.
 Variable Hexp : forall x y, U y -> inf_beta x y -> U x.
-Variable U_dec : forall t, {U t}+{~(U t)}.
+Variable U_xm : forall t, U t \/ ~(U t).
 
 Lemma lem_not_U_has_rnf : forall t, ~(U t) -> has_rnf t.
 Proof.
   intros.
-  enough (~~(has_rnf t)) by (pose has_rnf_dec; ycrush).
+  enough (~~(has_rnf t)) by (pose has_rnf_xm; ycrush).
   ycrush.
 Qed.
 
@@ -31,7 +32,7 @@ Proof.
   coinduct CH; intros.
   - clear CH.
     assert (HH: ~ U x').
-    destruct (U_dec x'); auto.
+    destruct (U_xm x'); auto.
     assert (U x) by (pose lem_U_morphism; pose_term_eq; ycrush).
     exfalso; eauto.
     assert (crnf x' (lem_not_U_has_rnf x' HH) == var n).
@@ -39,7 +40,7 @@ Proof.
     destruct y'; sauto.
     eapply red_nu_var; pose_term_eq; eauto.
   - assert (HH: ~ U x').
-    clear CH; destruct (U_dec x'); auto.
+    clear CH; destruct (U_xm x'); auto.
     assert (U x) by (pose lem_U_morphism; pose_term_eq; ycrush).
     exfalso; eauto.
     assert (crnf x' (lem_not_U_has_rnf x' HH) == app t1 t2).
@@ -51,7 +52,7 @@ Proof.
     * eapply CH with (x := t1) (y := s1); solve [ assumption | reflexivity ].
     * eapply CH with (x := t2) (y := s2); solve [ assumption | reflexivity ].
   - assert (HH: ~ U x').
-    clear CH; destruct (U_dec x'); auto.
+    clear CH; destruct (U_xm x'); auto.
     assert (U x) by (pose lem_U_morphism; pose_term_eq; ycrush).
     exfalso; eauto.
     assert (crnf x' (lem_not_U_has_rnf x' HH) == abs t0).
@@ -85,8 +86,16 @@ Proof.
     coinduction.
 Qed.
 
+Lemma lem_U_dec : forall t, {U t}+{~(U t)}.
+Proof.
+  intro t.
+  enough ({ u : {U t}+{~(U t)} | True}) by ycrush.
+  apply constructive_indefinite_description.
+  destruct (U_xm t); ycrush.
+Qed.
+
 CoFixpoint F_red_nu_reduct (t : term) : term.
-destruct (U_dec t) as [H | H].
+destruct (lem_U_dec t) as [H | H].
 - exact bot.
 - destruct (crnf t (lem_not_U_has_rnf t H)) eqn:Ht.
   + exact bot.
@@ -102,7 +111,7 @@ Proof.
   cofix CH.
   intro t.
   peek (F_red_nu_reduct t).
-  destruct (U_dec t) as [H | H].
+  destruct (lem_U_dec t) as [H | H].
   - clear CH; constructor; assumption.
   - destruct (crnf t (lem_not_U_has_rnf t H)) eqn:Ht.
     + clear CH; pose lem_crnf_not_bot; ycrush.
@@ -185,10 +194,10 @@ Lemma lem_red_nu_inf_beta_bot_prepend : forall t t' s, inf_beta_bot U t t' -> re
 Proof.
   cofix CH.
   intros t t' s H1 H2.
-  destruct (U_dec t).
+  destruct (U_xm t).
   - clear CH; pose lem_red_nu_inf_beta_bot_prepend_U; ycrush.
   - assert (~U t') by
-        (clear CH; unfold not in *; intro H; apply n;
+        (clear CH; unfold not in *; intro; apply H;
          eapply cor_inf_beta_bot_preserves_U_rev; ycrush).
     assert (Hr: has_rnf t') by
         (clear CH; Reconstr.reasy (@RedNu.lem_not_U_has_rnf) Reconstr.Empty).
@@ -202,7 +211,7 @@ Proof.
     assert (is_rnf (crnf t' Hr)) by
         (clear CH; generalize (lem_crnf_is_crnf t' Hr); unfold is_crnf; ycrush).
     assert (HH: is_rnf r \/ U r) by
-        (clear CH; eapply lem_par_bot_preserves_rnf_rev; try yelles 1; intro t0; destruct (U_dec t0); ycrush).
+        (clear CH; eapply lem_par_bot_preserves_rnf_rev; try yelles 1; intro t0; destruct (U_xm t0); ycrush).
     destruct HH.
     + assert (Hp: has_rnf t) by
           (clear CH; ycrush).
@@ -215,13 +224,13 @@ Proof.
            pose lem_inf_beta_bot_append_par_bot; ycrush).
       inversion H2; subst.
       * clear CH.
-        assert (crnf t' Hr == var n0) by
+        assert (crnf t' Hr == var n) by
             (pose lem_crnf_unique; pose_term_eq; ycrush).
-        assert (inf_beta_bot U (crnf t Hp) (var n0)) by
+        assert (inf_beta_bot U (crnf t Hp) (var n)) by
             (pose lem_inf_beta_bot_morphism; pose_term_eq; ycrush).
-        assert (crnf t Hp == var n0) by
+        assert (crnf t Hp == var n) by
             (pose lem_inf_beta_bot_rnf_to_var; ycrush).
-        assert (crnf t (lem_not_U_has_rnf t n) == var n0) by
+        assert (crnf t (lem_not_U_has_rnf t H) == var n) by
             (pose lem_crnf_unique; pose_term_eq; ycrush).
         econstructor; ycrush.
       * assert (crnf t' Hr == app t1 t2) by
@@ -231,7 +240,7 @@ Proof.
         assert (HH: exists x y, crnf t Hp = app x y /\ inf_beta_bot U x t1 /\ inf_beta_bot U y t2) by
             (clear CH; apply lem_inf_beta_bot_rnf_to_app; ycrush).
         destruct HH as [x [y [He1 [He2 He3]]]].
-        assert (crnf t (lem_not_U_has_rnf t n) == app x y) by
+        assert (crnf t (lem_not_U_has_rnf t H) == app x y) by
             (clear CH; pose lem_crnf_unique; pose_term_eq; ycrush).
         econstructor.
         ** eassumption.
@@ -244,7 +253,7 @@ Proof.
         assert (HH: exists x, crnf t Hp = abs x /\ inf_beta_bot U x t1) by
             (clear CH; apply lem_inf_beta_bot_rnf_to_abs; ycrush).
         destruct HH as [x [He1 He2]].
-        assert (crnf t (lem_not_U_has_rnf t n) == abs x) by
+        assert (crnf t (lem_not_U_has_rnf t H) == abs x) by
             (clear CH; pose lem_crnf_unique; pose_term_eq; ycrush).
         econstructor.
         ** eassumption.
