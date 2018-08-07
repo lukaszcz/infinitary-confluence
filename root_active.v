@@ -1,7 +1,6 @@
 
 Require Import weak.
 Require Import sim.
-Require Import cases.
 
 Inductive is_var_app (n : nat) : term -> Prop :=
 | is_var_app_var : forall t, t == var n -> is_var_app n t
