@@ -135,3 +135,4 @@ Definition nf_beta_bot U := nf (step_beta_bot U).
 
 Axiom is_rnf_xm : forall t, is_rnf t \/ ~(is_rnf t).
 Axiom has_rnf_xm : forall t, has_rnf t \/ ~(has_rnf t).
+Axiom strongly_meaningless_xm : forall U, strongly_meaningless U -> forall t, U t \/ ~(U t).

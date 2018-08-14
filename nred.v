@@ -9,13 +9,18 @@ Section RedNu.
 Variable U : term -> Prop.
 Variable Hm : meaningless U.
 Variable Hexp : forall x y, U y -> inf_beta x y -> U x.
-Variable U_xm : forall t, U t \/ ~(U t).
 
 Lemma lem_not_U_has_rnf : forall t, ~(U t) -> has_rnf t.
 Proof.
+  clear Hexp.
   intros.
   enough (~~(has_rnf t)) by (pose has_rnf_xm; ycrush).
   ycrush.
+Qed.
+
+Lemma lem_Hsm : strongly_meaningless U.
+Proof.
+  unfold strongly_meaningless; ycrush.
 Qed.
 
 CoInductive red_nu : term -> term -> Prop :=
@@ -32,7 +37,7 @@ Proof.
   coinduct CH; intros.
   - clear CH.
     assert (HH: ~ U x').
-    destruct (U_xm x'); auto.
+    destruct (strongly_meaningless_xm U lem_Hsm x'); auto.
     assert (U x) by (pose lem_U_morphism; pose_term_eq; ycrush).
     exfalso; eauto.
     assert (crnf x' (lem_not_U_has_rnf x' HH) == var n).
@@ -40,7 +45,7 @@ Proof.
     destruct y'; sauto.
     eapply red_nu_var; pose_term_eq; eauto.
   - assert (HH: ~ U x').
-    clear CH; destruct (U_xm x'); auto.
+    clear CH; destruct (strongly_meaningless_xm U lem_Hsm x'); auto.
     assert (U x) by (pose lem_U_morphism; pose_term_eq; ycrush).
     exfalso; eauto.
     assert (crnf x' (lem_not_U_has_rnf x' HH) == app t1 t2).
@@ -52,7 +57,7 @@ Proof.
     * eapply CH with (x := t1) (y := s1); solve [ assumption | reflexivity ].
     * eapply CH with (x := t2) (y := s2); solve [ assumption | reflexivity ].
   - assert (HH: ~ U x').
-    clear CH; destruct (U_xm x'); auto.
+    clear CH; destruct (strongly_meaningless_xm U lem_Hsm x'); auto.
     assert (U x) by (pose lem_U_morphism; pose_term_eq; ycrush).
     exfalso; eauto.
     assert (crnf x' (lem_not_U_has_rnf x' HH) == abs t0).
@@ -91,7 +96,7 @@ Proof.
   intro t.
   enough ({ u : {U t}+{~(U t)} | True}) by ycrush.
   apply constructive_indefinite_description.
-  destruct (U_xm t); ycrush.
+  destruct (strongly_meaningless_xm U lem_Hsm t); ycrush.
 Qed.
 
 CoFixpoint F_red_nu_reduct (t : term) : term.
@@ -194,7 +199,7 @@ Lemma lem_red_nu_inf_beta_bot_prepend : forall t t' s, inf_beta_bot U t t' -> re
 Proof.
   cofix CH.
   intros t t' s H1 H2.
-  destruct (U_xm t).
+  destruct (strongly_meaningless_xm U lem_Hsm t).
   - clear CH; pose lem_red_nu_inf_beta_bot_prepend_U; ycrush.
   - assert (~U t') by
         (clear CH; unfold not in *; intro; apply H;
@@ -211,7 +216,7 @@ Proof.
     assert (is_rnf (crnf t' Hr)) by
         (clear CH; generalize (lem_crnf_is_crnf t' Hr); unfold is_crnf; ycrush).
     assert (HH: is_rnf r \/ U r) by
-        (clear CH; eapply lem_par_bot_preserves_rnf_rev; try yelles 1; intro t0; destruct (U_xm t0); ycrush).
+        (clear CH; eapply lem_par_bot_preserves_rnf_rev; try yelles 1; intro t0; destruct (strongly_meaningless_xm U lem_Hsm t0); ycrush).
     destruct HH.
     + assert (Hp: has_rnf t) by
           (clear CH; ycrush).
