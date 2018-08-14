@@ -1,3 +1,6 @@
+(* This file formalises the lemmas from subsection 5.1, plus a few
+   trivial properties of (sim U) left implicit in the paper text. *)
+
 Require Import beta.
 Require Import cases.
 
@@ -47,6 +50,7 @@ Proof.
   coinduction.
 Qed.
 
+(* Lemma 5.4 *)
 Lemma lem_sim_trans : meaningless U -> transitive term (sim U).
 Proof.
   unfold meaningless.
@@ -71,6 +75,7 @@ Proof.
   coinduction.
 Qed.
 
+(* Lemma 5.1 *)
 Lemma lem_sim_subst : meaningless U ->
                       forall n t t' s s', sim U t t' -> sim U s s' -> sim U (t [n := s]) (t' [n := s']).
 Proof.
@@ -87,6 +92,7 @@ destruct (lem_par_clos_cases t s p).
 - exact (abs (F_sim_to_par_bot x y p0)).
 Defined.
 
+(* Lemma 5.5 *)
 Lemma lem_sim_to_par_bot : forall t s, sim U t s -> exists r, par_bot U t r /\ par_bot U s r.
 Proof.
   enough (exists f, forall t s (p : sim U t s), par_bot U t (f t s p) /\ par_bot U s (f t s p)) by ycrush.
@@ -112,6 +118,7 @@ Proof.
     + apply par_clos_abs; apply CH.
 Qed.
 
+(* Lemma 5.2 *)
 Lemma lem_step_beta_preserves_sim : meaningless U ->
   forall t t' s, step_beta t s -> sim U t t' -> exists s', step_beta_eq t' s' /\ sim U s s'.
 Proof.
@@ -283,6 +290,7 @@ destruct (lem_inf_beta_preserves_sim_cases_choice pu t t' s p1 p2).
 - exact (abs (F_inf_beta_preserves_sim t0 u0 s0 pu i s1)).
 Defined.
 
+(* Lemma 5.3 *)
 Lemma lem_inf_beta_preserves_sim : meaningless U ->
   forall t t' s, inf_beta t s -> sim U t t' -> exists s', inf_beta t' s' /\ sim U s s'.
 Proof.

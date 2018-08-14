@@ -1,3 +1,10 @@
+(* This file formalises the results of subsection 5.3 up to Lemma
+   5.22, including Theorem 5.20 only cited in the paper, but not
+   including Definition 5.24, lemmas 5.23, 5.25 (see crnf.v). The
+   formalisation of Theorem 5.20 closely follows the paper:
+   J. Endrullis, A. Polonsky, "Infinitary Rewriting Coinductively",
+   TYPES 2011. *)
+
 Require Export beta.
 
 Lemma lem_red_wh_refl : forall x y, x == y -> red_wh x y.
@@ -309,6 +316,7 @@ Proof.
   pose lem_red_wh_to_red_beta; coinduction.
 Qed.
 
+(* Theorem 5.20 *)
 Theorem thm_standardization : forall x y, inf_beta x y <-> inf_wh x y.
 Proof.
   Reconstr.reasy (@lem_inf_beta_to_inf_wh, @lem_inf_wh_to_inf_beta) Reconstr.Empty.
@@ -372,6 +380,7 @@ Proof.
   pose_term_eq; ycrush.
 Qed.
 
+(* Lemma 5.21 *)
 Lemma lem_wh_step_commute : forall t t1 t2, inf_wh t t1 -> step_wh t t2 ->
                                             exists t3, step_wh_eq t1 t3 /\ inf_wh t2 t3.
 Proof.
@@ -440,6 +449,7 @@ Proof.
     unfold step_wh_eq in *; pose_red_wh; ycrush.
 Qed.
 
+(* Lemma 5.22 *)
 Lemma lem_rnf_red_wh : forall t s, inf_beta t s -> is_rnf s ->
                                    exists s', is_rnf s' /\ red_wh t s' /\ inf_wh s' s.
 Proof.

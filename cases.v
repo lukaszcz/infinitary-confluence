@@ -1,3 +1,4 @@
+(* This file imports the constructive indefinite description axiom. *)
 
 Require Export Logic.IndefiniteDescription.
 

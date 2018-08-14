@@ -1,3 +1,5 @@
+(* This file formalises some basic facts about coinductively defined equality == (bisimulation). *)
+
 Require Import defs.
 Require Import tactics.
 

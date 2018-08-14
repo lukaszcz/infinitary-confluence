@@ -1,3 +1,4 @@
+(* This file contains all basic definitions from Section 4. *)
 
 Require Export Arith.
 Require Export Relations.

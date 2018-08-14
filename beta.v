@@ -1,3 +1,5 @@
+(* This file contains basic facts about finitary and infinitary beta-reduction, including lemmas 4.6-4.8. *)
+
 Require Export basics.
 
 Definition step_beta_eq t s := step_beta t s \/ t == s.
@@ -307,6 +309,7 @@ Proof.
   pose lem_step_beta_morphism; pose lem_inf_prepend; eauto.
 Qed.
 
+(* Lemma 4.6 *)
 Lemma lem_inf_beta_append_step : forall t1 t2 t3, inf_beta t1 t2 -> step_beta t2 t3 -> inf_beta t1 t3.
 Proof.
   intros t1 t2 t3 H0 H.
@@ -342,6 +345,7 @@ Proof.
   unfold appendable; pose lem_inf_beta_append; eauto.
 Qed.
 
+(* Lemma 4.7 *)
 Lemma lem_inf_beta_trans : transitive term inf_beta.
 Proof.
   eauto using lem_inf_trans, lem_inf_beta_appendable.
@@ -521,6 +525,7 @@ Qed.
 
 (******************************************************************************)
 
+(* Lemma 4.8 *)
 Lemma lem_inf_beta_preserves_rnf : forall t s, is_rnf t -> inf_beta t s -> is_rnf s.
 Proof.
   intros t s H; unfold is_rnf in H; repeat ysplit; yisolve; intros H1.

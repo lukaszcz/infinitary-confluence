@@ -1,3 +1,4 @@
+(* This file contains some basic facts about transitive-reflexive closure. *)
 
 Require Import tactics.
 Require Import defs.

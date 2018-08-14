@@ -1,7 +1,10 @@
+(* This file contains our main results: subsection 5.5, subsection 5.7, corollaries 5.47, 5.48. *)
+
 Require Import nred.
 Require Import root_active.
 Require Import botred.
 
+(* Theorem 5.33 *)
 Theorem thm_inf_beta_bot_confluent
         (U : term -> Prop) (Hms : strongly_meaningless U)
   : forall t t1 t2, inf_beta_bot U t t1 -> inf_beta_bot U t t2 ->
@@ -31,6 +34,7 @@ Qed.
 Check thm_inf_beta_bot_confluent.
 Print Assumptions thm_inf_beta_bot_confluent.
 
+(* Theorem 5.34 *)
 Theorem thm_inf_beta_bot_normalisation
         (U : term -> Prop) (Hms : strongly_meaningless U)
   : forall t, exists s, inf_beta_bot U t s /\ nf_beta_bot U s /\
@@ -57,6 +61,7 @@ Qed.
 Check thm_inf_beta_bot_normalisation.
 Print Assumptions thm_inf_beta_bot_normalisation.
 
+(* Corollary 5.47 *)
 Theorem thm_inf_beta_bot_ra_confluent
   : forall t t1 t2, inf_beta_bot root_active t t1 -> inf_beta_bot root_active t t2 ->
                     exists t3, inf_beta_bot root_active t1 t3 /\ inf_beta_bot root_active t2 t3.
@@ -67,6 +72,7 @@ Qed.
 Check thm_inf_beta_bot_ra_confluent.
 Print Assumptions thm_inf_beta_bot_ra_confluent.
 
+(* Corollary 5.48 *)
 Theorem thm_inf_beta_bot_ra_normalisation
   : forall t, exists s, inf_beta_bot root_active t s /\ nf_beta_bot root_active s /\
                         forall s', inf_beta_bot root_active t s' -> nf_beta_bot root_active s' -> s' == s.
@@ -77,6 +83,7 @@ Qed.
 Check thm_inf_beta_bot_ra_normalisation.
 Print Assumptions thm_inf_beta_bot_ra_normalisation.
 
+(* Theorem 5.49 *)
 Theorem thm_inf_beta_confluent_modulo (U : term -> Prop) (Hm : meaningless U)
   : forall t t' s s', sim U t t' -> inf_beta t s -> inf_beta t' s' ->
                       exists r r', sim U r r' /\ inf_beta s r /\ inf_beta s' r'.
@@ -93,9 +100,9 @@ Proof.
       Reconstr.reasy (thm_inf_beta_bot_ra_confluent) Reconstr.Empty.
   simp_hyps.
   assert (exists r, inf_beta s r /\ par_bot root_active r u) by
-      Reconstr.reasy (@root_active.thm_ra_strongly_meaningless, @botred.thm_inf_beta_bot_decompose) (@defs.strongly_meaningless).
+      Reconstr.reasy (@root_active.thm_ra_strongly_meaningless, @botred.lem_inf_beta_bot_decompose) (@defs.strongly_meaningless).
   assert (exists r0, inf_beta s0 r0 /\ par_bot root_active r0 u) by
-      Reconstr.reasy (@root_active.thm_ra_strongly_meaningless, @botred.thm_inf_beta_bot_decompose) (@defs.strongly_meaningless).
+      Reconstr.reasy (@root_active.thm_ra_strongly_meaningless, @botred.lem_inf_beta_bot_decompose) (@defs.strongly_meaningless).
   simp_hyps.
   assert (sim root_active r u) by
       Reconstr.reasy (@root_active.thm_ra_strongly_meaningless, @sim.lem_par_bot_to_sim) (@defs.meaningless, @defs.strongly_meaningless).

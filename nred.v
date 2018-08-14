@@ -1,3 +1,5 @@
+(* This file formalises subsection 5.4, except lemma 5.31 which is
+   formalised at the end of botred.v. *)
 
 Require Import crnf.
 Require Import botred.
@@ -23,6 +25,7 @@ Proof.
   unfold strongly_meaningless; ycrush.
 Qed.
 
+(* Definition 5.26 *)
 CoInductive red_nu : term -> term -> Prop :=
 | red_nu_var : forall t n (p : ~ U t), crnf t (lem_not_U_has_rnf t p) == (var n) -> red_nu t (var n)
 | red_nu_app : forall t t1 t2 s1 s2 (p : ~ U t), crnf t (lem_not_U_has_rnf t p) == (app t1 t2) ->
@@ -84,6 +87,7 @@ Proof.
   Reconstr.reasy (lem_red_wh_to_red_beta, lem_red_beta_to_red_beta_bot, lem_red_wh_to_crnf) Reconstr.Empty.
 Qed.
 
+(* Lemma 5.27 *)
 Lemma lem_red_nu_to_inf_beta_bot :
   forall t s, red_nu t s -> inf_beta_bot U t s.
 Proof.
@@ -109,6 +113,7 @@ destruct (lem_U_dec t) as [H | H].
   + exact (abs (F_red_nu_reduct t0)).
 Defined.
 
+(* Lemma 5.28 *)
 Lemma lem_red_nu_reduct : forall t, exists s, red_nu t s.
 Proof.
   enough (exists f, forall t, red_nu t (f t)) by ycrush.
@@ -130,6 +135,7 @@ Proof.
       * eapply CH.
 Qed.
 
+(* Lemma 5.29 *)
 Lemma lem_red_nu_unique : forall t s1 s2, red_nu t s1 -> red_nu t s2 -> s1 == s2.
 Proof.
   coinduction CH using eauto.
@@ -186,6 +192,38 @@ Proof.
     + clear CH; yisolve.
 Qed.
 
+(* Lemma 5.30 *)
+Lemma lem_red_nu_nf : forall t s, red_nu t s -> nf_beta_bot U s.
+Proof.
+  unfold nf_beta_bot, nf, not.
+  intros t s H0 s0 H.
+  revert t H0.
+  induction H; intros t Ht; try yelles 1.
+  destruct H.
+  - inversion Ht; subst.
+    + ycrush.
+    + inversion H; subst.
+      inversion H3; subst; yisolve; fold term_eq in *.
+      rewrite H8 in *.
+      inversion H1; subst.
+      assert (HH: red_beta t1 (abs t5)) by
+          (clear -H6; pose lem_red_beta_to_crnf; pose_term_eq; ycrush).
+      clear -HH H0.
+      assert (is_rnf (crnf t (lem_not_U_has_rnf t p))) by
+          (pose lem_crnf_is_crnf; unfold is_crnf in *; ycrush).
+      rewrite H0 in *.
+      unfold is_rnf in *.
+      pose_inf_beta; ycrush.
+    + ycrush.
+    + ycrush.
+  - unfold bot_redex in *; simp_hyps.
+    assert (inf_beta_bot U t x) by
+	Reconstr.reasy (@RedNu.lem_red_nu_to_inf_beta_bot) Reconstr.Empty.
+    assert (U t) by
+        (eapply cor_inf_beta_bot_preserves_U_rev; ycrush).
+    ycrush.
+Qed.
+
 Lemma lem_red_nu_inf_beta_bot_prepend_U :
   forall t t' s, U t -> inf_beta_bot U t t' -> red_nu t' s -> red_nu t s.
 Proof.
@@ -195,6 +233,7 @@ Proof.
   inversion H1; ycrush.
 Qed.
 
+(* Lemma 5.32 *)
 Lemma lem_red_nu_inf_beta_bot_prepend : forall t t' s, inf_beta_bot U t t' -> red_nu t' s -> red_nu t s.
 Proof.
   cofix CH.
@@ -211,7 +250,7 @@ Proof.
     assert (inf_beta_bot U t (crnf t' Hr)) by
         (clear CH; pose cor_inf_beta_bot_append_red_beta; pose lem_red_wh_to_red_beta; ycrush).
     assert (HH: exists r, inf_beta t r /\ par_bot U r (crnf t' Hr)) by
-        (clear CH; Reconstr.rcrush (@botred.thm_inf_beta_bot_decompose, @RedNu.lem_not_U_has_rnf) (@defs.root_active, @defs.meaningless, @RedNu.F_red_nu_reduct, @defs.has_rnf)).
+        (clear CH; Reconstr.rcrush (@botred.lem_inf_beta_bot_decompose, @RedNu.lem_not_U_has_rnf) (@defs.root_active, @defs.meaningless, @RedNu.F_red_nu_reduct, @defs.has_rnf)).
     destruct HH as [r [HH1 HH2]].
     assert (is_rnf (crnf t' Hr)) by
         (clear CH; generalize (lem_crnf_is_crnf t' Hr); unfold is_crnf; ycrush).
@@ -265,37 +304,6 @@ Proof.
         ** eapply CH; clear CH; eauto.
       * clear CH; ycrush.
     + clear CH; pose lem_red_nu_inf_beta_bot_prepend_U; ycrush.
-Qed.
-
-Lemma lem_red_nu_nf : forall t s, red_nu t s -> nf_beta_bot U s.
-Proof.
-  unfold nf_beta_bot, nf, not.
-  intros t s H0 s0 H.
-  revert t H0.
-  induction H; intros t Ht; try yelles 1.
-  destruct H.
-  - inversion Ht; subst.
-    + ycrush.
-    + inversion H; subst.
-      inversion H3; subst; yisolve; fold term_eq in *.
-      rewrite H8 in *.
-      inversion H1; subst.
-      assert (HH: red_beta t1 (abs t5)) by
-          (clear -H6; pose lem_red_beta_to_crnf; pose_term_eq; ycrush).
-      clear -HH H0.
-      assert (is_rnf (crnf t (lem_not_U_has_rnf t p))) by
-          (pose lem_crnf_is_crnf; unfold is_crnf in *; ycrush).
-      rewrite H0 in *.
-      unfold is_rnf in *.
-      pose_inf_beta; ycrush.
-    + ycrush.
-    + ycrush.
-  - unfold bot_redex in *; simp_hyps.
-    assert (inf_beta_bot U t x) by
-	Reconstr.reasy (@RedNu.lem_red_nu_to_inf_beta_bot) Reconstr.Empty.
-    assert (U t) by
-        (eapply cor_inf_beta_bot_preserves_U_rev; ycrush).
-    ycrush.
 Qed.
 
 End RedNu.

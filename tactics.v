@@ -1,3 +1,7 @@
+(* This file contains some tactics, including the "coinduction" tactic
+   which introduces the coinductive hypothesis, tries to perform case
+   analysis and automatically solve some of the easier cases (in a
+   guarded manner). *)
 
 Require Export Arith.
 Require Export Omega.
@@ -30,6 +34,8 @@ Ltac csolve0 H tac :=
   intros; autorewrite with shints;
   solve [ econstructor; solve [ eapply H; clear H; tac | try clear H; tac ] | try clear H; tac ].
 
+(* "cosolve CH" solves the current goal, ensuring that the coinductive
+   hypothesis CH is used in a guarded manner *)
 Tactic Notation "cosolve" hyp(H) := csolve0 H ltac:(eauto; yelles 1).
 Tactic Notation "cosolve" hyp(H) "using" tactic(tac) := csolve0 H tac.
 

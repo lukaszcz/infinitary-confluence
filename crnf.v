@@ -1,3 +1,6 @@
+(* This file defines canonical root normal forms and formalises the
+   parts of subsection 5.3 not formalised in weak.v. *)
+
 Require Export weak.
 Require Import cases.
 
@@ -31,6 +34,7 @@ Proof.
   induction 1; ycrush.
 Qed.
 
+(* Lemma 5.23 *)
 Lemma lem_step_wh_n_unique : forall n t s s', step_wh_n n t s -> step_wh_n n t s' -> s == s'.
 Proof.
   induction n.
@@ -73,11 +77,15 @@ Proof.
         ycrush.
 Qed.
 
+(* Definition 5.24 *)
 Definition is_crnf t r := is_rnf r /\
                           exists n, step_wh_n n t r /\
                                     forall s m, step_wh_n m t s -> is_rnf s -> m >= n.
 Hint Unfold is_crnf.
 
+(* Formalisation of the remark after Definition 5.24: if t has a rnf
+   then it has a crnf, which is unique by Lemma 5.23. This depends on
+   the standardisation theorem 5.20 through lemma 5.22. *)
 Lemma lem_crnf_exists : forall t, has_rnf t -> exists r, is_crnf t r.
 Proof.
   intros t H.
@@ -140,6 +148,7 @@ Proof.
   pose lem_crnf_is_crnf; pose lem_is_crnf_unique; ycrush.
 Qed.
 
+(* Lemma 5.25, depends on Theorem 5.20 through Lemma 5.22 *)
 Lemma lem_crnf_property :
   forall t r, is_crnf t r -> forall s, inf_beta t s -> is_rnf s -> red_wh t r /\ inf_wh r s.
 Proof.

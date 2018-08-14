@@ -1,3 +1,7 @@
+(* This file formalises some basic properties of the relations from
+   Section 4, including lemmas 4.3, 4.4 and generalised versions of
+   lemmas 4.5, 4.7. *)
+
 Require Export defs.
 Require Export tactics.
 Require Export star.
@@ -136,21 +140,25 @@ Proof.
   pose_star; coinduction on 0.
 Qed.
 
+(* Lemma 4.3, (1) *)
 Lemma lem_inf_refl : forall x y, x == y -> inf_clos (star R) x y.
 Proof.
   pose_star; pose_term_eq; coinduction on 0.
 Qed.
 
+(* Lemma 4.3, (2) *)
 Lemma lem_inf_prepend : forall x y z, star R x y -> inf_clos (star R) y z -> inf_clos (star R) x z.
 Proof.
   pose_star; csolve on 4.
 Qed.
 
+(* Lemma 4.3, (3) *)
 Lemma lem_star_to_inf : forall x y, star R x y -> inf_clos (star R) x y.
 Proof.
   Reconstr.reasy (lem_inf_refl_0, lem_inf_prepend) (reflexive).
 Qed.
 
+(* Lemma 4.4 *)
 Lemma lem_inf_subset (S : relation term) : (forall x y, R x y -> S x y) ->
                        forall x y, inf_clos (star R) x y -> inf_clos (star S) x y.
 Proof.
@@ -220,6 +228,7 @@ End Basic_clos_props.
 
 (******************************************************************************)
 
+(* Lemma 4.5, generalised *)
 Lemma lem_inf_subst (R : relation term):
   morphism R -> subst_closed R -> shift_closed R ->
   forall s s' t t', inf_clos (star R) s s' -> inf_clos (star R) t t' ->
@@ -263,6 +272,7 @@ Qed.
 Definition appendable (R : relation term) :=
   forall t1 t2 t3, inf_clos R t1 t2 -> R t2 t3 -> inf_clos R t1 t3.
 
+(* Lemma 6.2, generalised Lemma 4.7 *)
 Lemma lem_inf_trans (R : relation term) : appendable R -> transitive term (inf_clos R).
 Proof.
   unfold appendable; unfold transitive.

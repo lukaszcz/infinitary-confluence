@@ -1,3 +1,6 @@
+(* This file formalises the lemmas from subsection 5.2, Lemma 5.31,
+   and some trivial facts left implicit in the paper text. *)
+
 Require Export beta.
 Require Export sim.
 Require Import cases.
@@ -19,11 +22,13 @@ Proof.
   coinduction.
 Qed.
 
+(* Lemma 5.8, part 1 *)
 Lemma lem_par_bot_preserves_U : forall t s, U t -> par_bot U t s -> U s.
 Proof.
   pose lem_par_bot_to_sim; ycrush.
 Qed.
 
+(* Lemma 5.8, part 2 *)
 Lemma lem_par_bot_preserves_U_rev : forall t s, U t -> par_bot U s t -> U s.
 Proof.
   pose lem_par_bot_to_sim; pose lem_sim_sym; unfold symmetric in *; ycrush.
@@ -35,6 +40,7 @@ Proof.
   unfold bot_redex; pose lem_par_bot_preserves_U_rev; ycrush.
 Qed.
 
+(* Lemma 5.9 *)
 Lemma lem_par_bot_trans : transitive term (par_bot U).
 Proof.
   coinduction CH on 4 using auto.
@@ -137,6 +143,7 @@ Proof.
   - left; sauto.
 Qed.
 
+(* Lemma 5.6 *)
 Lemma lem_par_bot_subst : forall t t' s s', par_bot U t t' -> par_bot U s s' ->
                                             forall n, par_bot U (t [n := s]) (t' [n := s']).
 Proof.
@@ -388,11 +395,13 @@ Ltac pose_inf_beta_bot := pose proof lem_inf_beta_bot_refl; pose proof lem_inf_b
 
 (************************************************************************************************)
 
+(* Lemma 5.7 *)
 Lemma lem_par_bot_to_inf_beta_bot : forall t s, par_bot U t s -> inf_beta_bot U t s.
 Proof.
   pose_red_beta_bot; pose_inf_beta_bot; coinduction.
 Qed.
 
+(* Lemma 5.10 *)
 Lemma lem_par_bot_over_step_beta :
   forall t1 t2 t3, par_bot U t1 t2 -> step_beta t2 t3 -> exists s, step_beta t1 s /\ par_bot U s t3.
 Proof.
@@ -435,6 +444,7 @@ Proof.
   induction 1; sintuition; unfold beta_bot_redex in *; ycrush.
 Qed.
 
+(* Lemma 5.11 *)
 Lemma lem_red_beta_bot_decompose : forall t s, red_beta_bot U t s -> exists r, red_beta t r /\ par_bot U r s.
 Proof.
   intros t s H.
@@ -446,6 +456,7 @@ Proof.
         pose_red_beta; ycrush.
 Qed.
 
+(* Corollary 5.12 *)
 Corollary cor_par_bot_over_red_beta_bot :
   forall t1 t2 t3, par_bot U t1 t2 -> red_beta_bot U t2 t3 ->
                    exists s, red_beta t1 s /\ par_bot U s t3.
@@ -459,6 +470,7 @@ Proof.
   pose lem_par_bot_over_red_beta; pose lem_par_bot_trans; ycrush.
 Qed.
 
+(* Lemma 5.13 *)
 Lemma lem_inf_beta_bot_prepend_par_bot :
   forall t1 t2 t3, par_bot U t1 t2 -> inf_beta_bot U t2 t3 -> inf_beta_bot U t1 t3.
 Proof.
@@ -541,7 +553,8 @@ destruct (lem_inf_clos_cases t s p).
   exact (abs (F_inf_beta_bot_decompose x1 x' HH)).
 Defined.
 
-Theorem thm_inf_beta_bot_decompose :
+(* Lemma 5.14 *)
+Lemma lem_inf_beta_bot_decompose :
   forall t s, inf_beta_bot U t s -> exists r, inf_beta t r /\ par_bot U r s.
 Proof.
   enough (exists f, forall t s (p : inf_beta_bot U t s),
@@ -592,9 +605,10 @@ Proof.
       eapply CH.
 Qed.
 
+(* Corollary 5.15 *)
 Lemma lem_inf_beta_bot_preserves_U : forall x y, inf_beta_bot U x y -> U x -> U y.
 Proof.
-  pose thm_inf_beta_bot_decompose; pose lem_par_bot_preserves_U; ycrush.
+  pose lem_inf_beta_bot_decompose; pose lem_par_bot_preserves_U; ycrush.
 Qed.
 
 (************************************************************************************************)
@@ -635,11 +649,12 @@ Proof.
     apply par_clos_abs; apply CH; clear CH; pose lem_nf_beta_bot_abs; pose_term_eq; ycrush.
 Qed.
 
+(* Lemma 5.31, (1) *)
 Lemma lem_inf_beta_bot_rnf_to_var : forall t n, is_rnf t -> inf_beta_bot U t (var n) -> t == var n.
 Proof.
   intros.
   assert (Hr: exists r, inf_beta t r /\ par_bot U r (var n)) by
-      Reconstr.reasy (thm_inf_beta_bot_decompose) Reconstr.Empty.
+      Reconstr.reasy (lem_inf_beta_bot_decompose) Reconstr.Empty.
   destruct Hr as [r [Hr1 Hr2]].
   assert (r = var n) by (inversion_clear Hr2; ycrush).
   subst.
@@ -668,11 +683,12 @@ Section Botred_strong.
 Variable U : term -> Prop.
 Variable Hs : strongly_meaningless U.
 
+(* Corollary 5.16 *)
 Corollary cor_inf_beta_bot_preserves_U_rev : forall t s, U s -> inf_beta_bot U t s -> U t.
 Proof.
   destruct Hs as [Hm He].
   intros t s Hu H.
-  generalize (thm_inf_beta_bot_decompose U Hm t s H).
+  generalize (lem_inf_beta_bot_decompose U Hm t s H).
   intros; sintuition.
   assert (U r) by (apply lem_par_bot_preserves_U_rev with (t := s); assumption).
   ycrush.
@@ -689,6 +705,7 @@ Proof.
   pose lem_red_beta_bot_redex_U; ycrush.
 Qed.
 
+(* Lemma 5.17 *)
 Lemma lem_inf_beta_bot_append_par_bot :
   forall t t' s, inf_beta_bot U t t' -> par_bot U t' s -> inf_beta_bot U t s.
 Proof.
@@ -706,12 +723,13 @@ Proof.
     clear CH; eapply lem_inf_beta_bot_to_bot_redex; eauto.
 Qed.
 
+(* Corollary 5.18 *)
 Corollary cor_inf_beta_bot_append_red_beta :
   forall t s r, inf_beta_bot U t s -> red_beta s r -> inf_beta_bot U t r.
 Proof.
   destruct Hs as [Hm He].
   intros t s r H1 H2.
-  generalize (thm_inf_beta_bot_decompose U Hm t s H1); intro HH.
+  generalize (lem_inf_beta_bot_decompose U Hm t s H1); intro HH.
   destruct HH as [ t' [ H3 H4 ]].
   generalize (lem_par_bot_over_red_beta U Hm t' s r H4 H2); intro HH.
   destruct HH as [ s' [ H5 H6 ]].
@@ -719,11 +737,13 @@ Proof.
   eapply lem_inf_beta_bot_append_par_bot; eauto.
 Qed.
 
+(* Lemma 5.19 *)
 Lemma lem_par_bot_preserves_rnf_rev :
-  (forall t, U t \/ ~ U t) -> forall t s, par_bot U t s -> is_rnf s -> is_rnf t \/ U t.
+  forall t s, par_bot U t s -> is_rnf s -> is_rnf t \/ U t.
 Proof.
+  assert (H: forall t, U t \/ ~(U t)) by eauto using strongly_meaningless_xm.
   destruct Hs as [Hm Hexp].
-  intro H; unfold is_rnf; intros; repeat ysplit; try solve [ sauto ].
+  unfold is_rnf; intros; repeat ysplit; try solve [ sauto ].
   destruct (H (app t1 t2)); yisolve.
   inversion_clear H0.
   - ycrush.
@@ -738,12 +758,13 @@ Proof.
     ycrush.
 Qed.
 
+(* Lemma 5.31, (3) *)
 Lemma lem_inf_beta_bot_rnf_to_abs : forall t s, is_rnf t -> inf_beta_bot U t (abs s) ->
                                                 exists t0, t = abs t0 /\ inf_beta_bot U t0 s.
 Proof.
   intros.
   assert (Hr: exists r, inf_beta t r /\ par_bot U r (abs s)) by
-      Reconstr.reasy (thm_inf_beta_bot_decompose) Reconstr.Empty.
+      Reconstr.reasy (lem_inf_beta_bot_decompose) Reconstr.Empty.
   destruct Hr as [r [Hr1 Hr2]].
   assert (exists r0, r = abs r0) by (inversion_clear Hr2; ycrush).
   simp_hyps.
@@ -774,6 +795,7 @@ Proof.
       pose lem_inf_beta_bot_append_par_bot; pose lem_inf_beta_to_inf_beta_bot; ycrush.
 Qed.
 
+(* Lemma 5.31, (2) *)
 Lemma lem_inf_beta_bot_rnf_to_app : forall t s1 s2, is_rnf t -> inf_beta_bot U t (app s1 s2) ->
                                                     exists t1 t2, t = app t1 t2 /\
                                                                   inf_beta_bot U t1 s1 /\
@@ -781,7 +803,7 @@ Lemma lem_inf_beta_bot_rnf_to_app : forall t s1 s2, is_rnf t -> inf_beta_bot U t
 Proof.
   intros.
   assert (Hr: exists r, inf_beta t r /\ par_bot U r (app s1 s2)) by
-      Reconstr.reasy (thm_inf_beta_bot_decompose) Reconstr.Empty.
+      Reconstr.reasy (lem_inf_beta_bot_decompose) Reconstr.Empty.
   destruct Hr as [r [Hr1 Hr2]].
   assert (exists r1 r2, r = app r1 r2) by (inversion_clear Hr2; ycrush).
   simp_hyps.

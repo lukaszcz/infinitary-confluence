@@ -1,3 +1,4 @@
+(* This file formalises subsection 5.6 up to Theorem 5.46. *)
 
 Require Import weak.
 Require Import sim.
@@ -6,6 +7,7 @@ Inductive is_var_app (n : nat) : term -> Prop :=
 | is_var_app_var : forall t, t == var n -> is_var_app n t
 | is_var_app_app : forall t u, is_var_app n t -> is_var_app n (app t u).
 
+(* Definition 5.35 *)
 CoInductive succ (n : nat) : term -> term -> Prop :=
 | succ_base : forall t s, is_var_app n s -> succ n t s
 | succ_bot : succ n bot bot
@@ -78,6 +80,7 @@ Proof.
     ycrush.
 Qed.
 
+(* Lemma 5.36 *)
 Lemma lem_succ_subst :
   forall t t' s s' n, succ (n + 1) t t' -> forall m, m <= n -> succ (n - m) s s' ->
                                                      succ n (t [m := s]) (t' [m := s']).
@@ -99,6 +102,7 @@ Proof.
       ycrush.
 Qed.
 
+(* Lemma 5.37 *)
 Lemma lem_step_beta_preserves_succ :
   forall t t', step_beta t t' -> forall n s, succ n t s ->
                                              exists s', succ n t' s' /\ step_beta_eq s s'.
@@ -165,6 +169,7 @@ Proof.
   - intro HH; inversion_clear HH; yelles 2.
 Qed.
 
+(* Lemma 5.38 *)
 Lemma lem_step_beta_preserves_succ_2 :
   forall s s', step_beta s s' -> forall n t, succ n t s ->
                                              exists t', succ n t' s' /\ step_beta_eq t t'.
@@ -237,6 +242,7 @@ Proof.
   - pose lem_step_beta_preserves_is_var_app; yelles 3.
 Qed.
 
+(* Lemma 5.39 *)
 Lemma lem_succ_preserves_rnf : forall n t t', succ n t t' -> is_rnf t -> is_rnf t'.
 Proof.
   unfold is_rnf; sauto; eauto using lem_hlp_1.
@@ -320,6 +326,7 @@ Proof.
   pose_inf_beta; ycrush.
 Qed.
 
+(* Lemma 5.40 *)
 Lemma lem_has_rnf_subst : forall n t1 t2, has_rnf (t1 [n := t2]) -> has_rnf t1.
 Proof.
   unfold has_rnf.
@@ -382,6 +389,7 @@ Proof.
   pose lem_ra_shift; coinduction.
 Qed.
 
+(* Lemma 5.41 *)
 Lemma lem_sim_ra_subst : forall n t t' s s', sim_ra t t' -> sim_ra s s' ->
                                              sim_ra (t [n := s]) (t' [n := s']).
 Proof.
@@ -429,6 +437,7 @@ Proof.
   unfold root_active, not, has_rnf; pose_inf_beta; ycrush.
 Qed.
 
+(* Lemma 5.42 *)
 Lemma lem_step_beta_preserves_sim_ra :
   forall t t', step_beta t t' -> forall s, sim_ra t s -> exists s', step_beta_eq s s' /\ sim_ra t' s'.
 Proof.
@@ -494,6 +503,7 @@ Proof.
     destruct H2; pose_red_beta; pose_term_eq; ycrush.
 Qed.
 
+(* Lemma 5.43 *)
 Lemma lem_sim_ra_preserves_rnf : forall t s, sim_ra t s -> is_rnf t -> is_rnf s.
 Proof.
   intros.
@@ -511,6 +521,7 @@ Proof.
   - inversion H; sauto.
 Qed.
 
+(* Corollary 5.44 *)
 Lemma lem_sim_ra_preserves_ra : forall t s, sim_ra t s -> root_active t -> root_active s.
 Proof.
   unfold root_active, not, has_rnf.
@@ -525,6 +536,7 @@ Proof.
   pose_inf_beta; pose lem_sim_ra_preserves_rnf; ycrush.
 Qed.
 
+(* Lemma 5.45 *)
 Lemma lem_ra_expansion : forall t s, inf_beta t s -> root_active s -> root_active t.
 Proof.
   unfold root_active, not, has_rnf.
@@ -542,6 +554,7 @@ Proof.
   Reconstr.reasy (@beta.lem_red_beta_to_inf_beta, @weak.lem_red_wh_to_inf_wh, @weak.lem_inf_wh_to_inf_beta) Reconstr.Empty.
 Qed.
 
+(* Theorem 5.46 *)
 Theorem thm_ra_strongly_meaningless : strongly_meaningless root_active.
 Proof.
   unfold strongly_meaningless, meaningless.
