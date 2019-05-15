@@ -7,6 +7,20 @@ Require Export tactics.
 Require Export star.
 Require Export equality.
 
+Lemma lem_root_active_bot : root_active bot.
+Proof.
+  unfold root_active.
+  unfold has_rnf.
+  intro H.
+  destruct H as [t [H1 H2]].
+  revert H1.
+  inversion_clear H2.
+  - ycrush.
+  - inversion_clear H; sauto; inversion_clear H0.
+  - inversion_clear H; sauto; inversion_clear H0.
+  - inversion_clear H; sauto; inversion_clear H0.
+Qed.
+
 Section Basic_clos_props.
 
 Variable R : relation term.

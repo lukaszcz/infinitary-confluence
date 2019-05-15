@@ -559,15 +559,6 @@ Theorem thm_ra_strongly_meaningless : strongly_meaningless root_active.
 Proof.
   unfold strongly_meaningless, meaningless.
   repeat split.
-  - unfold root_active, not, has_rnf.
-    sauto.
-    destruct t'; sauto.
-    + assert (bot == var n) by (pose lem_red_beta_preserves_bot; pose_term_eq; ycrush).
-      scrush.
-    + assert (bot == app x y) by (pose lem_red_beta_preserves_bot; pose_term_eq; ycrush).
-      scrush.
-    + assert (bot == abs x) by (pose lem_red_beta_preserves_bot; pose_term_eq; ycrush).
-      scrush.
   - Reconstr.reasy (@lem_inf_beta_preserves_ra) Reconstr.Empty.
   - Reconstr.reasy (@lem_ra_subst) Reconstr.Empty.
   - Reconstr.reasy (@lem_ra_shift) Reconstr.Empty.

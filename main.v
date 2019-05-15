@@ -105,9 +105,9 @@ Proof.
       Reconstr.reasy (@root_active.thm_ra_strongly_meaningless, @botred.lem_inf_beta_bot_decompose) (@defs.strongly_meaningless).
   simp_hyps.
   assert (sim root_active r u) by
-      Reconstr.reasy (@root_active.thm_ra_strongly_meaningless, @sim.lem_par_bot_to_sim) (@defs.meaningless, @defs.strongly_meaningless).
+      Reconstr.reasy (@root_active.thm_ra_strongly_meaningless, @sim.lem_par_bot_to_sim, lem_root_active_bot) (@defs.meaningless, @defs.strongly_meaningless).
   assert (sim root_active r0 u) by
-      Reconstr.reasy (@root_active.thm_ra_strongly_meaningless, @sim.lem_par_bot_to_sim) (@defs.meaningless, @defs.strongly_meaningless).
+      Reconstr.reasy (@root_active.thm_ra_strongly_meaningless, @sim.lem_par_bot_to_sim, lem_root_active_bot) (@defs.meaningless, @defs.strongly_meaningless).
   assert (sim U r u) by
       (pose lem_sim_subset; ycrush).
   assert (sim U r0 u) by

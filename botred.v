@@ -25,13 +25,13 @@ Qed.
 (* Lemma 5.8, part 1 *)
 Lemma lem_par_bot_preserves_U : forall t s, U t -> par_bot U t s -> U s.
 Proof.
-  pose lem_par_bot_to_sim; ycrush.
+  pose lem_par_bot_to_sim; pose lem_root_active_bot; ycrush.
 Qed.
 
 (* Lemma 5.8, part 2 *)
 Lemma lem_par_bot_preserves_U_rev : forall t s, U t -> par_bot U s t -> U s.
 Proof.
-  pose lem_par_bot_to_sim; pose lem_sim_sym; unfold symmetric in *; ycrush.
+  pose lem_par_bot_to_sim; pose lem_sim_sym; pose lem_root_active_bot; unfold symmetric in *; ycrush.
 Qed.
 
 Lemma lem_par_bot_preserves_bot_redex_rev :
@@ -748,7 +748,7 @@ Proof.
   inversion_clear H0.
   - ycrush.
   - left; intros.
-    assert (Hsim: sim U t1 s1) by (pose lem_par_bot_to_sim; ycrush).
+    assert (Hsim: sim U t1 s1) by (pose lem_par_bot_to_sim; pose lem_root_active_bot; ycrush).
     generalize (lem_inf_beta_preserves_sim U Hm t1 s1 z H0 Hsim); intro HH; destruct HH as [s [HH1 HH2]].
     inversion HH2; subst; try yelles 1.
     unfold not; intro; destruct z; try yelles 1.
@@ -788,7 +788,7 @@ Proof.
     assert (HH: s0 == x) by (pose_term_eq; ycrush).
     rewrite HH in *; clear HH.
     assert (inf_beta t r0) by
-	Reconstr.reasy (@beta.lem_inf_beta_prepend) (@defs.inf_beta, @defs.red_beta).
+        Reconstr.reasy (@beta.lem_inf_beta_prepend) (@defs.inf_beta, @defs.red_beta).
     inversion_clear Hr2.
     + exfalso; ycrush.
     + exists t; split; yisolve.
@@ -822,9 +822,9 @@ Proof.
       rewrite <- H10 in *.
       rewrite <- H12 in *.
       assert (inf_beta t1 r1) by
-	  Reconstr.reasy (@beta.lem_inf_beta_prepend) (@defs.inf_beta, @defs.red_beta).
+          Reconstr.reasy (@beta.lem_inf_beta_prepend) (@defs.inf_beta, @defs.red_beta).
       assert (inf_beta t2 r2) by
-	  Reconstr.reasy (@beta.lem_inf_beta_prepend) (@defs.inf_beta, @defs.red_beta).
+          Reconstr.reasy (@beta.lem_inf_beta_prepend) (@defs.inf_beta, @defs.red_beta).
       inversion_clear Hr2.
       * exfalso; ycrush.
       * assert (inf_beta_bot U t1 s1) by
